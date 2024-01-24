@@ -88,6 +88,9 @@ int main() {
             {
                 printf("Invalid choice. Choose a section (1-4): ");
                 scanf("%d", &selection);
+
+                if(selection < 0)
+                { selection = 10; }
             }
         }
     }
