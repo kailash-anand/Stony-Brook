@@ -60,7 +60,7 @@ int main() {
         if(result != 4 && board[result] == 1)
         {
             displayBoard(board, length);
-            printf("You lost beacuse the last counter fell into section ");
+            printf("You lost because the last counter fell into section ");
             printf("%d", result+1);
             break;
         }
