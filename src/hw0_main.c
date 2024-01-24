@@ -47,7 +47,7 @@ int main() {
     board[length-1] = 0;
 
     displayBoard(board,length);
-    printf("Choose a section (1-4)-");
+    printf("Choose a section (1-4): ");
     scanf("%d", &selection);
     while(1)
     {
