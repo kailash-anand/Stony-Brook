@@ -55,8 +55,9 @@ int main() {
         
         if(result != 4 && board[result] == 1)
         {
+            displayBoard(board, length);
             printf("You lost beacuse the counter fell into index ");
-            printf("%d", result);
+            printf("%d", result+1);
             break;
         }
 
@@ -79,6 +80,11 @@ int main() {
             displayBoard(board,length);
             printf("Choose a section (1-4)-");
             scanf("%d", &selection);
+            while(selection >= length || board[selection-1] == 0)
+            {
+                printf("Invalid choice. Choose a section (1-4)-");
+                scanf("%d", &selection);
+            }
         }
     }
 
