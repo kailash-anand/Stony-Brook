@@ -10,7 +10,7 @@ void displayBoard(int board[5], int length)
     {
         if(i == length-1)
         {
-            printf("|");
+            printf("| ");
         }
         printf("%d", board[i]);
         printf(" ");
@@ -56,7 +56,7 @@ int main() {
         if(result != 4 && board[result] == 1)
         {
             displayBoard(board, length);
-            printf("You lost beacuse the counter fell into index ");
+            printf("You lost beacuse the last counter fell into section ");
             printf("%d", result+1);
             break;
         }
@@ -71,7 +71,7 @@ int main() {
         {
             displayBoard(board,length);
             printf("Last piece landed in section ");
-            printf("%d", result); 
+            printf("%d", result+1); 
             printf(". Continue sowing seeds!\n");
             selection = result + 1;
         }
@@ -82,7 +82,7 @@ int main() {
             scanf("%d", &selection);
             while(selection >= length || board[selection-1] == 0)
             {
-                printf("Invalid choice. Choose a section (1-4)-");
+                printf("Invalid choice. Choose a section (1-4): ");
                 scanf("%d", &selection);
             }
         }
