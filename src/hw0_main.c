@@ -78,7 +78,7 @@ int main() {
         else
         {
             displayBoard(board,length);
-            printf("Choose a section (1-4)-");
+            printf("Choose a section (1-4): ");
             scanf("%d", &selection);
             while(selection >= length || board[selection-1] == 0)
             {
