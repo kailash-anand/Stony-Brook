@@ -13,7 +13,11 @@ void displayBoard(int board[5], int length)
             printf("| ");
         }
         printf("%d", board[i]);
-        printf(" ");
+
+        if(i != length-1)
+        {
+            printf(" ");
+        }
     }
     printf("\n");
 }
