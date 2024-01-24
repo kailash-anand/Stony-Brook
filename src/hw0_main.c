@@ -61,7 +61,7 @@ int main() {
         {
             displayBoard(board, length);
             printf("You lost because the last counter fell into section ");
-            printf("%d", result+1);
+            printf("%d.", result+1);
             break;
         }
 
