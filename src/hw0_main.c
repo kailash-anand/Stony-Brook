@@ -67,7 +67,7 @@ int main() {
 
         if(result == 4 && board[result] == 8)
         {
-            printf("YOU WIN!");
+            printf("YOU WON!");
             break;
         }
 
