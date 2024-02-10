@@ -20,7 +20,8 @@ void print_packet_sf(unsigned char packet[])
     }
 
     printf("Payload:");
-    for(int i = 0; i < 3; i++)
+    unsigned int length = ((packet[9] & 0b00000011) << 12) | (packet[10] << 4) | ((packet[11] & 0b11110000) >> 4);
+    for(unsigned int i = 0; i < (length - 16); i += 4)
     {
         printPayload(&packet[0], index);
         index += 4;
