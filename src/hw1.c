@@ -1,9 +1,10 @@
 #include "hw1.h"
 #include <math.h>
+#include <string.h>
 
-void printHeader(int switchId, const char headerName[], unsigned char packet[]);
+int printHeader(int switchId, const char headerName[], unsigned char packet[]);
 
-void printPayload(unsigned char packet[], int index);
+int printPayload(unsigned char packet[], int index, char mode[]);
 
 void print_packet_sf(unsigned char packet[])
 {
@@ -23,7 +24,7 @@ void print_packet_sf(unsigned char packet[])
     unsigned int length = ((packet[9] & 0b00000011) << 12) | (packet[10] << 4) | ((packet[11] & 0b11110000) >> 4);
     for(unsigned int i = 0; i < (length - 16); i += 4)
     {
-        printPayload(&packet[0], index);
+        printPayload(&packet[0], index, "");
         index += 4;
     }
     printf("\n");
@@ -31,8 +32,26 @@ void print_packet_sf(unsigned char packet[])
 
 unsigned int compute_checksum_sf(unsigned char packet[])
 {
-    (void)packet;
-    return -1;
+    unsigned int length = ((packet[9] & 0b00000011) << 12) | (packet[10] << 4) | ((packet[11] & 0b11110000) >> 4);
+    unsigned int checkSum = 0;
+    int index = 16;
+
+    for(unsigned int i = 0; i < 16; i++)
+    {
+        if(i == 7)
+        {
+            continue;
+        }
+        checkSum += printHeader((i + 1), "NONE", &packet[0]);
+    }
+
+    for(unsigned int i = 0; i < (length - 16); i += 4)
+    {
+        checkSum += abs(printPayload(&packet[0], index, "SUM"));
+        index += 4;
+    }
+
+    return (checkSum % ((1<<23) - 1));
 }
 
 unsigned int reconstruct_array_sf(unsigned char *packets[], unsigned int packets_len, int *array, unsigned int array_len) {
@@ -63,7 +82,7 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     return -1;
 }
 
-void printHeader(int switchId, const char headerName[], unsigned char packet[])
+int printHeader(int switchId, const char headerName[], unsigned char packet[])
 {
     unsigned int decoded = 0;
     switch(switchId)
@@ -108,10 +127,17 @@ void printHeader(int switchId, const char headerName[], unsigned char packet[])
             decoded = (packet[15] & 0b00111111);
             break;    
     }
-    printf("%s: %d\n",headerName , decoded);
+
+
+    if(strcmp(headerName, "NONE") != 0)
+    {
+        printf("%s: %d\n", headerName, decoded);
+    }
+
+    return decoded;
 }
 
-void printPayload(unsigned char packet[], int index)
+int printPayload(unsigned char packet[], int index, char mode[])
 {
     int shift = 32;
     const int ELEMENT_SIZE = 8;
@@ -124,7 +150,14 @@ void printPayload(unsigned char packet[], int index)
         index++;
     }
     payload = payload | packet[index];
+
+    if(strcmp(mode, "SUM") == 0)
+    {
+        return payload;
+    }
+
     printf(" %d", payload);
+    return payload;
 }
 
 
