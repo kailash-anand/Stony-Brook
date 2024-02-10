@@ -25,6 +25,7 @@ void print_packet_sf(unsigned char packet[])
         printPayload(&packet[0], index);
         index += 4;
     }
+    printf("\n");
 }
 
 unsigned int compute_checksum_sf(unsigned char packet[])
