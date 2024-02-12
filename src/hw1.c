@@ -6,6 +6,8 @@ int printHeader(int switchId, const char headerName[], unsigned char packet[]);
 
 int printPayload(unsigned char packet[], int index, char mode[]);
 
+int reconstructData(unsigned char packet[], int array[], int array_len);
+
 void print_packet_sf(unsigned char packet[])
 {
     int index = 16;
@@ -32,11 +34,12 @@ void print_packet_sf(unsigned char packet[])
 
 unsigned int compute_checksum_sf(unsigned char packet[])
 {
-    unsigned int length = ((packet[9] & 0b00000011) << 12) | (packet[10] << 4) | ((packet[11] & 0b11110000) >> 4);
+    const int PKT_LENGTH_ID = 6;
+    unsigned int length = printHeader(PKT_LENGTH_ID, "NONE", &packet[0]);
     unsigned int checkSum = 0;
     int index = 16;
 
-    for(unsigned int i = 0; i < 16; i++)
+    for(unsigned int i = 0; i < 10; i++)
     {
         if(i == 7)
         {
@@ -55,11 +58,17 @@ unsigned int compute_checksum_sf(unsigned char packet[])
 }
 
 unsigned int reconstruct_array_sf(unsigned char *packets[], unsigned int packets_len, int *array, unsigned int array_len) {
-    (void)packets;
-    (void)packets_len;
-    (void)array;
-    (void)array_len;
-    return -1;
+    unsigned int count = 0;
+
+    for(unsigned int i = 0; i < packets_len; i++)
+    {
+        if(reconstructData(packets[i], array, array_len))
+        {
+            count++;
+        }
+    }
+    printf("Count is %d",count);
+    return count;
 }
 
 unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned char *packets[], unsigned int packets_len,
@@ -158,6 +167,39 @@ int printPayload(unsigned char packet[], int index, char mode[])
 
     printf(" %d", payload);
     return payload;
+}
+
+int reconstructData(unsigned char packet[], int array[], int array_len)
+{
+    const int FRAGMENT_OFFSET_ID = 5, PACKET_LENGTH_ID = 6, CHECK_SUM_ID = 8;
+    unsigned int fragmentOffset = printHeader(FRAGMENT_OFFSET_ID, "NONE", packet);
+    unsigned int packetLength = printHeader(PACKET_LENGTH_ID, "NONE", packet);
+    unsigned int checkSum = printHeader(CHECK_SUM_ID, "NONE", packet);
+
+    printf("%d %d\n", checkSum, compute_checksum_sf(packet));
+
+    if(compute_checksum_sf(packet) == checkSum)
+    {
+        int index = 16;
+        unsigned int location = fragmentOffset/4;
+
+        for(unsigned int i = 0; i < (packetLength - 16); i += 4)
+        {
+            if(location >= array_len)
+            {
+                break;
+            }
+            array[location] = printPayload(&packet[0], index, "SUM");
+            location++;
+            index += 4;
+        }
+
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
