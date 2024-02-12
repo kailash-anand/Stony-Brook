@@ -2,9 +2,9 @@
 #include <math.h>
 #include <string.h>
 
-int printHeader(int switchId, const char headerName[], unsigned char packet[]);
+unsigned int printOrGetHeader(int switchId, const char headerName[], unsigned char packet[]);
 
-int printPayload(unsigned char packet[], int index, char mode[]);
+unsigned int printOrGetPayload(unsigned char packet[], int index, char mode[]);
 
 int reconstructData(unsigned char packet[], int array[], int array_len);
 
@@ -19,14 +19,14 @@ void print_packet_sf(unsigned char packet[])
                                        "Traffic Class"};
     for(int i = 0; i < NO_OF_HEADERS; i++)
     {
-        printHeader((i + 1), HEADER_NAMES[i], &packet[0]);
+        printOrGetHeader((i + 1), HEADER_NAMES[i], &packet[0]);
     }
 
     printf("Payload:");
     unsigned int length = ((packet[9] & 0b00000011) << 12) | (packet[10] << 4) | ((packet[11] & 0b11110000) >> 4);
     for(unsigned int i = 0; i < (length - 16); i += 4)
     {
-        printPayload(&packet[0], index, "PRINT");
+        printOrGetPayload(&packet[0], index, "PRINT");
         index += 4;
     }
     printf("\n");
@@ -35,7 +35,7 @@ void print_packet_sf(unsigned char packet[])
 unsigned int compute_checksum_sf(unsigned char packet[])
 {
     const int PKT_LENGTH_ID = 6;
-    unsigned int length = printHeader(PKT_LENGTH_ID, "NONE", &packet[0]);
+    unsigned int length = printOrGetHeader(PKT_LENGTH_ID, "GET", &packet[0]);
     unsigned int checkSum = 0;
     int index = 16;
 
@@ -45,12 +45,12 @@ unsigned int compute_checksum_sf(unsigned char packet[])
         {
             continue;
         }
-        checkSum += printHeader((i + 1), "NONE", &packet[0]);
+        checkSum += printOrGetHeader((i + 1), "GET", &packet[0]);
     }
 
     for(unsigned int i = 0; i < (length - 16); i += 4)
     {
-        checkSum += abs(printPayload(&packet[0], index, "SUM"));
+        checkSum += abs(printOrGetPayload(&packet[0], index, "GET"));
         index += 4;
     }
 
@@ -59,15 +59,13 @@ unsigned int compute_checksum_sf(unsigned char packet[])
 
 unsigned int reconstruct_array_sf(unsigned char *packets[], unsigned int packets_len, int *array, unsigned int array_len) {
     unsigned int count = 0;
+    const int PACKET_LENGTH_ID = 6;
 
     for(unsigned int i = 0; i < packets_len; i++)
     {
-        if(reconstructData(packets[i], array, array_len))
-        {
-            count++;
-        }
+        count += reconstructData(packets[i], array, array_len);
     }
-    printf("Count is %d",count);
+    printf("Count is %d\n",count);
     return count;
 }
 
@@ -91,7 +89,7 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     return -1;
 }
 
-int printHeader(int switchId, const char headerName[], unsigned char packet[])
+unsigned int printOrGetHeader(int switchId, const char headerName[], unsigned char packet[])
 {
     unsigned int decoded = 0;
     switch(switchId)
@@ -136,17 +134,18 @@ int printHeader(int switchId, const char headerName[], unsigned char packet[])
             decoded = (packet[15] & 0b00111111);
             break;    
     }
-
-
-    if(strcmp(headerName, "NONE") != 0)
+    
+    if(strcmp(headerName, "GET") == 0)
     {
-        printf("%s: %d\n", headerName, decoded);
+        return decoded;
     }
 
-    return decoded;
+    printf("%s: %d\n", headerName, decoded);
+
+    return 0;
 }
 
-int printPayload(unsigned char packet[], int index, char mode[])
+unsigned int printOrGetPayload(unsigned char packet[], int index, char mode[])
 {
     int shift = 32;
     const int ELEMENT_SIZE = 8;
@@ -160,24 +159,27 @@ int printPayload(unsigned char packet[], int index, char mode[])
     }
     payload = payload | packet[index];
 
-    if(strcmp(mode, "SUM") == 0)
+    if(strcmp(mode, "GET") == 0)
     {
         return payload;
     }
 
-    printf(" %d", payload);
-    return payload;
+    if(strcmp(mode, "PRINT") == 0)
+    {
+        printf(" %d", payload);
+    }
+
+    return 0;
 }
 
 int reconstructData(unsigned char packet[], int array[], int array_len)
 {
     const int FRAGMENT_OFFSET_ID = 5, PACKET_LENGTH_ID = 6, CHECK_SUM_ID = 8;
-    unsigned int fragmentOffset = printHeader(FRAGMENT_OFFSET_ID, "NONE", packet);
-    unsigned int packetLength = printHeader(PACKET_LENGTH_ID, "NONE", packet);
-    unsigned int checkSum = printHeader(CHECK_SUM_ID, "NONE", packet);
-
-    printf("%d %d\n", checkSum, compute_checksum_sf(packet));
-
+    int countPayload = 0;
+    unsigned int fragmentOffset = printOrGetHeader(FRAGMENT_OFFSET_ID, "GET", packet);
+    unsigned int packetLength = printOrGetHeader(PACKET_LENGTH_ID, "GET", packet);
+    unsigned int checkSum = printOrGetHeader(CHECK_SUM_ID, "GET", packet);
+    
     if(compute_checksum_sf(packet) == checkSum)
     {
         int index = 16;
@@ -189,12 +191,14 @@ int reconstructData(unsigned char packet[], int array[], int array_len)
             {
                 break;
             }
-            array[location] = printPayload(&packet[0], index, "SUM");
+            array[location] = printOrGetPayload(&packet[0], index, "GET");
+
+            countPayload++;
+
             location++;
             index += 4;
         }
-
-        return 1;
+        return countPayload;
     }
     else
     {
