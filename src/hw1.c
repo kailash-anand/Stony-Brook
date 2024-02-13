@@ -8,7 +8,7 @@ unsigned int printOrGetPayload(unsigned char packet[], int index, char mode[]);
 
 int reconstructData(unsigned char packet[], int array[], int array_len);
 
-void assignMemory(unsigned int *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len);
+void assignMemory(unsigned char *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len);
 
 void print_packet_sf(unsigned char packet[])
 {
@@ -203,11 +203,11 @@ int reconstructData(unsigned char packet[], int array[], int array_len)
     }
 }
 
-void assignMemory(unsigned int *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len)
+void assignMemory(unsigned char *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len)
 {
     unsigned int maxPayloadsPerPacket = max_payload/4;
     unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
-    unsigned int leftoverPayload = array_len % max_payload;
+    unsigned int leftoverPayload = array_len % maxPayloadsPerPacket;
     const int HEADER_SIZE = 16;
 
     int count = 0;
