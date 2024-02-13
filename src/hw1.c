@@ -78,7 +78,7 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
     unsigned int leftoverPayload = array_len % max_payload;
     
-    assignMemory(packets, packets_len, max_payload, array_len);
+    //assignMemory(packets, packets_len, max_payload, array_len);
     for(int i = 0; i < array_len; i++)
     {
         
