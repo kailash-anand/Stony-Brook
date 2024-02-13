@@ -75,12 +75,13 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
                           unsigned int compression_scheme, unsigned int traffic_class)
 {
     unsigned int maxPayloadsPerPacket = max_payload/4;
-    assignMemory(packets, packets_len, max_payload, array_len);
+    unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
+    unsigned int leftoverPayload = array_len % max_payload;
     
-
+    assignMemory(packets, packets_len, max_payload, array_len);
     for(int i = 0; i < array_len; i++)
     {
-
+        
     }
 
     return -1;
