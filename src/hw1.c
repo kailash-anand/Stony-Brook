@@ -8,11 +8,12 @@ unsigned int printOrGetPayload(unsigned char packet[], int index, char mode[]);
 
 int reconstructData(unsigned char packet[], int array[], int array_len);
 
+void assignMemory(unsigned int *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len);
+
 void print_packet_sf(unsigned char packet[])
 {
     int index = 16;
     const int NO_OF_HEADERS = 10;
-    const int HEADER_SIZES[] = {28,28,4,4,14,14,5,23,2,6};
     const char *HEADER_NAMES[] = {"Source Address" , "Destination Address", "Source Port",
                                        "Destination Port", "Fragment Offset", "Packet Length",
                                        "Maximum Hop Count", "Checksum", "Compression Scheme",
@@ -65,7 +66,6 @@ unsigned int reconstruct_array_sf(unsigned char *packets[], unsigned int packets
     {
         count += reconstructData(packets[i], array, array_len);
     }
-    printf("Count is %d\n",count);
     return count;
 }
 
@@ -74,18 +74,15 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
                           unsigned int src_port, unsigned int dest_port, unsigned int maximum_hop_count,
                           unsigned int compression_scheme, unsigned int traffic_class)
 {
-    (void)array;
-    (void)array_len;
-    (void)packets;
-    (void)packets_len;
-    (void)max_payload;
-    (void)src_addr;
-    (void)dest_addr;
-    (void)src_port;
-    (void)dest_port;
-    (void)maximum_hop_count;
-    (void)compression_scheme;
-    (void)traffic_class;
+    unsigned int maxPayloadsPerPacket = max_payload/4;
+    assignMemory(packets, packets_len, max_payload, array_len);
+    
+
+    for(int i = 0; i < array_len; i++)
+    {
+
+    }
+
     return -1;
 }
 
@@ -99,7 +96,7 @@ unsigned int printOrGetHeader(int switchId, const char headerName[], unsigned ch
             break;
 
         case 2:
-            decoded = (packet[3] & 0b00001111) | (packet[4] << 16) | (packet[5] << 8) | packet[6];
+            decoded = ((packet[3] & 0b00001111) << 24) | (packet[4] << 16) | (packet[5] << 8) | packet[6];
             break;
 
         case 3:
@@ -149,8 +146,8 @@ unsigned int printOrGetPayload(unsigned char packet[], int index, char mode[])
 {
     int shift = 32;
     const int ELEMENT_SIZE = 8;
-
     unsigned int payload = 0;
+    
     while(shift > ELEMENT_SIZE)
     {
         shift = shift - ELEMENT_SIZE;
@@ -179,7 +176,7 @@ int reconstructData(unsigned char packet[], int array[], int array_len)
     unsigned int fragmentOffset = printOrGetHeader(FRAGMENT_OFFSET_ID, "GET", packet);
     unsigned int packetLength = printOrGetHeader(PACKET_LENGTH_ID, "GET", packet);
     unsigned int checkSum = printOrGetHeader(CHECK_SUM_ID, "GET", packet);
-    
+
     if(compute_checksum_sf(packet) == checkSum)
     {
         int index = 16;
@@ -194,7 +191,6 @@ int reconstructData(unsigned char packet[], int array[], int array_len)
             array[location] = printOrGetPayload(&packet[0], index, "GET");
 
             countPayload++;
-
             location++;
             index += 4;
         }
@@ -203,6 +199,27 @@ int reconstructData(unsigned char packet[], int array[], int array_len)
     else
     {
         return 0;
+    }
+}
+
+void assignMemory(unsigned int *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len)
+{
+    unsigned int maxPayloadsPerPacket = max_payload/4;
+    unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
+    unsigned int leftoverPayload = array_len % max_payload;
+    const int HEADER_SIZE = 16;
+
+    int count = 0;
+    for(int i = 0; i < packets_len; i++)
+    {
+        if(count == numberOfPayloads)
+        {
+            packet[i] = malloc(HEADER_SIZE + leftoverPayload);
+            break;
+        }
+
+        packet[i] = malloc(HEADER_SIZE + maxPayloadsPerPacket);
+        count++;
     }
 }
 

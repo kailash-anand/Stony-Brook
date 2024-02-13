@@ -2,11 +2,9 @@
 #include "hw1.h"
 
 int main() {
-     #include "reconstruct_array_sf_args01.h"
-    unsigned int elements_written = reconstruct_array_sf((unsigned char **)packets, sizeof(packets)/sizeof(packets[0]), 
-        reconstructed_array, sizeof(reconstructed_array) / sizeof(reconstructed_array[0]));
-    (void)elements_written;
-    (void)expected_num_elements;
-	(void)expected_array;
+      unsigned char packet[] = {
+        0x00,0x1e,0x0f,0x32,0x0e,0xf4,0x86,0xcd,0x00,0x80,0x02,0x07,0x10,0xd6,0x41,0x0f,0x00,0x00,0x00,0x12,0x00,0x00,0x00,0x13,0x00,0x00,0x00,0x14,0x00,0x00,0x00,0x15
+			};
+    print_packet_sf(packet);
     return 0;
 }
