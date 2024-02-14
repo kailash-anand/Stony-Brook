@@ -10,6 +10,10 @@ int reconstructData(unsigned char packet[], int array[], int array_len);
 
 void assignMemory(unsigned char *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len);
 
+void fillHeaders(unsigned char *packet[], unsigned int packet_len, int headers[], int numberOfPayloads, int index);
+
+void fillPacket(unsigned char packet[], int array[], int numberOfElements, int startIndex);
+
 void print_packet_sf(unsigned char packet[])
 {
     int index = 16;
@@ -76,15 +80,68 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
 {
     unsigned int maxPayloadsPerPacket = max_payload/4;
     unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
-    unsigned int leftoverPayload = array_len % max_payload;
-    
-    //assignMemory(packets, packets_len, max_payload, array_len);
-    for(int i = 0; i < array_len; i++)
+    unsigned int leftoverPayload = array_len - (numberOfPayloads*maxPayloadsPerPacket);
+    unsigned int totalPayloads = numberOfPayloads;
+
+    if(leftoverPayload != 0)
     {
-        
+        totalPayloads++;
     }
 
-    return -1;
+    unsigned int packetIndex = 0;
+    unsigned int count = 0;
+    unsigned int headers[] = {src_addr, dest_addr, src_port, dest_port, 0,0, maximum_hop_count,
+                              0, compression_scheme, traffic_class};
+    
+    assignMemory(packets, max_payload, packets_len, array_len);
+
+    if(totalPayloads > packets_len)
+    {
+        totalPayloads = packets_len;
+    }
+
+    for(int i = 0; i < totalPayloads; i++)
+    {
+        if((leftoverPayload != 0) && (i == (totalPayloads - 1)))
+        {
+            headers[4] = packetIndex*4;
+            headers[5] = leftoverPayload*4 + 16;
+            fillHeaders(packets, packets_len, headers, totalPayloads, i);
+            fillPacket(packets[i], &array[0], leftoverPayload, packetIndex);
+            count += leftoverPayload;
+            break;
+        }
+
+        headers[4] = packetIndex*4;
+        headers[5] = maxPayloadsPerPacket*4 + 16;
+        fillHeaders(packets, packets_len, headers, totalPayloads, i);
+        fillPacket(packets[i], &array[0], maxPayloadsPerPacket, packetIndex);
+        packetIndex += maxPayloadsPerPacket;
+        count++;;
+    }
+
+    // printf(" %d",packets[1][17]);
+    // printf(" %d",packets[1][18]);
+    // printf(" %d",packets[1][19]);
+    // printf(" %d",packets[1][20]);
+    // printf("\n");
+    // printf(" %d",packets[1][21]);
+    // printf(" %d",packets[1][22]);
+    // printf(" %d",packets[1][23]);
+    // printf(" %d",packets[1][24]);
+    // printf("\n");
+    // printf(" %d",packets[1][25]);
+    // printf(" %d",packets[1][26]);
+    // printf(" %d",packets[1][27]);
+    // printf(" %d",packets[1][28]);
+    // printf("\n");
+    // printf(" %d",packets[1][29]);
+    // printf(" %d",packets[1][30]);
+    // printf(" %d",packets[1][31]);
+    // printf(" %d",packets[1][32]);
+    // printf("\n");
+
+    return count;
 }
 
 unsigned int printOrGetHeader(int switchId, const char headerName[], unsigned char packet[])
@@ -207,21 +264,83 @@ void assignMemory(unsigned char *packet[], unsigned int max_payload, unsigned in
 {
     unsigned int maxPayloadsPerPacket = max_payload/4;
     unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
-    unsigned int leftoverPayload = array_len % maxPayloadsPerPacket;
+    unsigned int leftoverPayload = array_len - (maxPayloadsPerPacket*numberOfPayloads);
+
+    if(leftoverPayload != 0)
+    {
+        numberOfPayloads++;
+    }
+
+    if(numberOfPayloads > packets_len)
+    {
+        numberOfPayloads = packets_len;
+    }
+    
     const int HEADER_SIZE = 16;
 
     int count = 0;
-    for(int i = 0; i < packets_len; i++)
+    for(int i = 0; i < numberOfPayloads; i++)
     {
-        if(count == numberOfPayloads)
+        if(leftoverPayload != 0)
         {
-            packet[i] = malloc(HEADER_SIZE + leftoverPayload);
-            break;
+            if(i == (numberOfPayloads - 1))
+            {
+                packet[i] = malloc(HEADER_SIZE + leftoverPayload*4);
+                break;
+            }
         }
 
-        packet[i] = malloc(HEADER_SIZE + maxPayloadsPerPacket);
-        count++;
+        packet[i] = malloc(HEADER_SIZE + maxPayloadsPerPacket*4);
     }
+}
+
+void fillHeaders(unsigned char *packet[], unsigned int packet_len, int headers[], int numberOfPayloads, int index)
+{
+    const int HEADER_SIZE = 16;
+    int debug = 1;
+
+    if(numberOfPayloads > packet_len)
+    {
+        numberOfPayloads = packet_len;
+    }
+
+    packet[index][0] = headers[0] >> 24;
+    packet[index][1] = (headers[0] >> 12) & 0x00FF;
+    packet[index][2] = (headers[0] >> 4) & 0x0000FF;
+    packet[index][3] = ((headers[0] << 28) >> 24) | (headers[1] >> 24);
+    packet[index][4] = (headers[1] << 8) >> 24;
+    packet[index][5] = (headers[1] << 16) >> 24;
+    packet[index][6] = (headers[1] << 24) >> 24;
+    packet[index][7] = (headers[2] << 4) | (headers[3]);
+    packet[index][8] = (headers[4] >> 6);
+    packet[index][9] = ((headers[4] << 26) >> 24) | (headers[5] >> 12);
+    packet[index][10] = (headers[5] << 20) >> 24;
+    packet[index][11] = ((headers[5] << 28) >> 24) | (headers[6] >> 1);
+    packet[index][12] = ((headers[6] << 31) >> 26);
+    packet[index][15] = (headers[8] << 6) | headers[9];
+    
+}
+
+void fillPacket(unsigned char packet[], int array[], int numberOfElements, int startIndex)
+{
+    int arrayIndex = 17;
+    for(int i = startIndex; i < (startIndex + numberOfElements); i++)
+    { 
+       packet[arrayIndex] = array[i] >> 24;
+       arrayIndex++;
+       packet[arrayIndex] = (array[i] << 8) >> 24;
+       arrayIndex++;
+       packet[arrayIndex] = (array[i] << 16) >> 24;
+       arrayIndex++;
+       packet[arrayIndex] = (array[i] << 24) >> 24;
+       arrayIndex++; 
+    }
+    
+    unsigned int checkSum = compute_checksum_sf(packet);
+
+    packet[12] |= checkSum >> 16;
+    packet[13] = ((checkSum << 16) >> 24);
+    packet[14] = ((checkSum) << 24) >> 24;
 }
 
 
