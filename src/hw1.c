@@ -108,7 +108,7 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
             headers[5] = leftoverPayload*4 + 16;
             fillHeaders(packets, packets_len, headers, totalPayloads, i);
             fillPacket(packets[i], &array[0], leftoverPayload, packetIndex);
-            count += leftoverPayload;
+            count ++;
             break;
         }
 
