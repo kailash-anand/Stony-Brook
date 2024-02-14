@@ -83,7 +83,12 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     unsigned int leftoverPayload = array_len - (numberOfPayloads*maxPayloadsPerPacket);
     unsigned int totalPayloads = numberOfPayloads;
 
-    if(leftoverPayload != 0)
+    if(packets_len < totalPayloads)
+    {
+        leftoverPayload = 0;
+    }
+
+    if(leftoverPayload != 0) 
     {
         totalPayloads++;
     }
@@ -120,31 +125,6 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
         count++;;
     }
 
-    // printf(" %x",packets[1][16]);
-    // printf(" %x",packets[1][17]);
-    // printf(" %x",packets[1][18]);
-    // printf(" %x",packets[1][19]);
-    // printf("\n");
-    // printf(" %x",packets[1][20]);
-    // printf(" %x",packets[1][21]);
-    // printf(" %x",packets[1][22]);
-    // printf(" %x",packets[1][23]);
-    // printf("\n");
-    // printf(" %x",packets[1][24]);
-    // printf(" %x",packets[1][25]);
-    // printf(" %x",packets[1][26]);
-    // printf(" %x",packets[1][27]);
-    // printf("\n");
-    // printf(" %x",packets[1][28]);
-    // printf(" %x",packets[1][39]);
-    // printf(" %x",packets[1][30]);
-    // printf(" %x",packets[1][31]);
-    // printf("\n");
-    // printf(" %x",packets[1][32]);
-    // printf(" %x",packets[1][33]);
-    // printf(" %x",packets[1][34]);
-    // printf(" %x",packets[1][35]);
-    // printf("\n");
     return count;
 }
 
@@ -269,6 +249,11 @@ void assignMemory(unsigned char *packet[], unsigned int max_payload, unsigned in
     unsigned int maxPayloadsPerPacket = max_payload/4;
     unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
     unsigned int leftoverPayload = array_len - (maxPayloadsPerPacket*numberOfPayloads);
+
+    if(packets_len < numberOfPayloads)
+    {
+        leftoverPayload = 0;
+    }
 
     if(leftoverPayload != 0)
     {
