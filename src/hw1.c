@@ -8,8 +8,6 @@ unsigned int printOrGetPayload(unsigned char packet[], int index, char mode[]);
 
 int reconstructData(unsigned char packet[], int array[], int array_len);
 
-void assignMemory(unsigned char *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len);
-
 void fillHeaders(unsigned char *packet[], unsigned int packet_len, int headers[], int numberOfPayloads, int index);
 
 void fillPacket(unsigned char packet[], int array[], int numberOfElements, int startIndex);
@@ -97,12 +95,25 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     unsigned int count = 0;
     unsigned int headers[] = {src_addr, dest_addr, src_port, dest_port, 0,0, maximum_hop_count,
                               0, compression_scheme, traffic_class};
-    
-    assignMemory(packets, max_payload, packets_len, array_len);
 
     if(totalPayloads > packets_len)
     {
         totalPayloads = packets_len;
+    }
+
+    const int HEADER_SIZE = 16;
+    for(int i = 0; i < numberOfPayloads; i++)
+    {
+        if(leftoverPayload != 0)
+        {
+            if(i == (numberOfPayloads - 1))
+            {
+                packets[i] = malloc(HEADER_SIZE + leftoverPayload*4);
+                break;
+            }
+        }
+
+        packets[i] = malloc(HEADER_SIZE + maxPayloadsPerPacket*4);
     }
 
     for(int i = 0; i < totalPayloads; i++)
@@ -241,45 +252,6 @@ int reconstructData(unsigned char packet[], int array[], int array_len)
     else
     {
         return 0;
-    }
-}
-
-void assignMemory(unsigned char *packet[], unsigned int max_payload, unsigned int packets_len, unsigned int array_len)
-{
-    unsigned int maxPayloadsPerPacket = max_payload/4;
-    unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
-    unsigned int leftoverPayload = array_len - (maxPayloadsPerPacket*numberOfPayloads);
-
-    if(packets_len < numberOfPayloads)
-    {
-        leftoverPayload = 0;
-    }
-
-    if(leftoverPayload != 0)
-    {
-        numberOfPayloads++;
-    }
-
-    if(numberOfPayloads > packets_len)
-    {
-        numberOfPayloads = packets_len;
-    }
-    
-    const int HEADER_SIZE = 16;
-
-    int count = 0;
-    for(int i = 0; i < numberOfPayloads; i++)
-    {
-        if(leftoverPayload != 0)
-        {
-            if(i == (numberOfPayloads - 1))
-            {
-                packet[i] = malloc(HEADER_SIZE + leftoverPayload*4);
-                break;
-            }
-        }
-
-        packet[i] = malloc(HEADER_SIZE + maxPayloadsPerPacket*4);
     }
 }
 
