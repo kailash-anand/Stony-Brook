@@ -145,9 +145,6 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     // printf(" %x",packets[1][34]);
     // printf(" %x",packets[1][35]);
     // printf("\n");
-
-    // print_packet_sf(packets[0]);
-
     return count;
 }
 
@@ -323,7 +320,7 @@ void fillHeaders(unsigned char *packet[], unsigned int packet_len, int headers[]
     packet[index][9] = ((headers[4] << 26) >> 24) | (headers[5] >> 12);
     packet[index][10] = (headers[5] << 20) >> 24;
     packet[index][11] = ((headers[5] << 28) >> 24) | (headers[6] >> 1);
-    packet[index][12] = ((headers[6] << 31) >> 26);
+    packet[index][12] = ((headers[6] << 31) >> 31);
     packet[index][15] = (headers[8] << 6) | headers[9];
     
 }
@@ -345,7 +342,8 @@ void fillPacket(unsigned char packet[], int array[], int numberOfElements, int s
     
     unsigned int checkSum = compute_checksum_sf(packet);
 
-    packet[12] |= checkSum >> 16;
+    packet[12] = (packet[12] << 7);
+    packet[12] = packet[12] | (checkSum >> 16);
     packet[13] = ((checkSum << 16) >> 24);
     packet[14] = ((checkSum) << 24) >> 24;
 }
