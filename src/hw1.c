@@ -97,11 +97,11 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     }
 
     const int HEADER_SIZE = 16;
-    for(int i = 0; i < totalPayloads; i++)
+    for(int i = 0; i < numberOfPayloads; i++)
     {
         if(leftoverPayload != 0)
         {
-            if(i == (totalPayloads - 1))
+            if(i == (numberOfPayloads - 1))
             {
                 packets[i] = malloc(HEADER_SIZE + leftoverPayload*4);
                 break;
