@@ -120,26 +120,33 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
         count++;;
     }
 
-    // printf(" %d",packets[1][17]);
-    // printf(" %d",packets[1][18]);
-    // printf(" %d",packets[1][19]);
-    // printf(" %d",packets[1][20]);
+    // printf(" %x",packets[1][16]);
+    // printf(" %x",packets[1][17]);
+    // printf(" %x",packets[1][18]);
+    // printf(" %x",packets[1][19]);
     // printf("\n");
-    // printf(" %d",packets[1][21]);
-    // printf(" %d",packets[1][22]);
-    // printf(" %d",packets[1][23]);
-    // printf(" %d",packets[1][24]);
+    // printf(" %x",packets[1][20]);
+    // printf(" %x",packets[1][21]);
+    // printf(" %x",packets[1][22]);
+    // printf(" %x",packets[1][23]);
     // printf("\n");
-    // printf(" %d",packets[1][25]);
-    // printf(" %d",packets[1][26]);
-    // printf(" %d",packets[1][27]);
-    // printf(" %d",packets[1][28]);
+    // printf(" %x",packets[1][24]);
+    // printf(" %x",packets[1][25]);
+    // printf(" %x",packets[1][26]);
+    // printf(" %x",packets[1][27]);
     // printf("\n");
-    // printf(" %d",packets[1][29]);
-    // printf(" %d",packets[1][30]);
-    // printf(" %d",packets[1][31]);
-    // printf(" %d",packets[1][32]);
+    // printf(" %x",packets[1][28]);
+    // printf(" %x",packets[1][39]);
+    // printf(" %x",packets[1][30]);
+    // printf(" %x",packets[1][31]);
     // printf("\n");
+    // printf(" %x",packets[1][32]);
+    // printf(" %x",packets[1][33]);
+    // printf(" %x",packets[1][34]);
+    // printf(" %x",packets[1][35]);
+    // printf("\n");
+
+    // print_packet_sf(packets[0]);
 
     return count;
 }
@@ -323,7 +330,7 @@ void fillHeaders(unsigned char *packet[], unsigned int packet_len, int headers[]
 
 void fillPacket(unsigned char packet[], int array[], int numberOfElements, int startIndex)
 {
-    int arrayIndex = 17;
+    int arrayIndex = 16;
     for(int i = startIndex; i < (startIndex + numberOfElements); i++)
     { 
        packet[arrayIndex] = array[i] >> 24;
