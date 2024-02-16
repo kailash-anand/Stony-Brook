@@ -79,21 +79,18 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     unsigned int maxPayloadsPerPacket = max_payload/4;
     unsigned int numberOfPayloads = array_len/maxPayloadsPerPacket;
     unsigned int leftoverPayload = array_len - (numberOfPayloads*maxPayloadsPerPacket);
-    unsigned int totalPayloads = numberOfPayloads;
 
-    if(packets_len < totalPayloads)
+    if(numberOfPayloads >= packets_len)
     {
+        numberOfPayloads = packets_len;
         leftoverPayload = 0;
     }
-
-    if(leftoverPayload != 0) 
+    else
     {
-        totalPayloads++;
-    }
-
-    if(totalPayloads > packets_len)
-    {
-        totalPayloads = packets_len;
+        if(leftoverPayload != 0)
+        {
+            numberOfPayloads++;
+        }
     }
 
     const int HEADER_SIZE = 16;
@@ -116,13 +113,13 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
     unsigned int headers[] = {src_addr, dest_addr, src_port, dest_port, 0,0, maximum_hop_count,
                               0, compression_scheme, traffic_class};
 
-    for(int i = 0; i < totalPayloads; i++)
+    for(int i = 0; i < numberOfPayloads; i++)
     {
-        if((leftoverPayload != 0) && (i == (totalPayloads - 1)))
+        if((leftoverPayload != 0) && (i == (numberOfPayloads - 1)))
         {
             headers[4] = packetIndex*4;
             headers[5] = leftoverPayload*4 + 16;
-            fillHeaders(packets, packets_len, &headers[0], totalPayloads, i);
+            fillHeaders(packets, packets_len, &headers[0], numberOfPayloads, i);
             fillPacket(packets[i], &array[0], leftoverPayload, packetIndex);
             count ++;
             break;
@@ -130,7 +127,7 @@ unsigned int packetize_array_sf(int *array, unsigned int array_len, unsigned cha
 
         headers[4] = packetIndex*4;
         headers[5] = maxPayloadsPerPacket*4 + 16;
-        fillHeaders(packets, packets_len, &headers[0], totalPayloads, i);
+        fillHeaders(packets, packets_len, &headers[0], numberOfPayloads, i);
         fillPacket(packets[i], &array[0], maxPayloadsPerPacket, packetIndex);
         packetIndex += maxPayloadsPerPacket;
         count++;;
