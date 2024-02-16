@@ -262,7 +262,7 @@ void fillHeaders(unsigned char *packet[], unsigned int packet_len, int headers[]
         numberOfPayloads = packet_len;
     }
 
-    packet[index][0] = headers[0] >> 24;
+    packet[index][0] = headers[0] >> 20;
     packet[index][1] = (headers[0] >> 12) & 0x00FF;
     packet[index][2] = (headers[0] >> 4) & 0x0000FF;
     packet[index][3] = ((headers[0] << 28) >> 24) | (headers[1] >> 24);
