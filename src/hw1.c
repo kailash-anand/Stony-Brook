@@ -32,6 +32,7 @@ void print_packet_sf(unsigned char packet[])
         printOrGetPayload(&packet[0], index, "PRINT");
         index += 4;
     }
+    
     printf("\n");
 }
 
