@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 
     }
 
-    return 1000;
+    return 0;
 }
 
 bool argInvalid(char *arg, char argument)
@@ -123,14 +123,12 @@ bool argInvalid(char *arg, char argument)
     switch(argument)
     {
         case 'c':
-            printf("C: %d\n", countDigits(arg));
             if(countDigits(arg) != 4)
             {
                 return true;
             }
             break;
         case 'p':
-            printf("P: %d\n", countDigits(arg));
             if(countDigits(arg) != 2)
             {
                 return true;
@@ -143,7 +141,6 @@ bool argInvalid(char *arg, char argument)
                 count++;
             }
 
-            printf("R: %d\n", (countDigits(arg) + count));
             if((countDigits(arg) + count) != 5)
             {
                 return true;
