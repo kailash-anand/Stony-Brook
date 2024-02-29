@@ -110,11 +110,9 @@ int main(int argc, char **argv)
             }
         }
 
-        //printf("%d ", errorCheck[i]);
     }
 
-    printf("\n");
-    return 0;
+    return 1000;
 }
 
 bool argInvalid(char *arg, char argument)
