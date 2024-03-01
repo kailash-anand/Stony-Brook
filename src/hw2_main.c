@@ -94,12 +94,13 @@ int main(int argc, char **argv)
 
     for(int i = 0; i < ERR_LENGTH; i++)
     {
+        printf("%d ", errorCheck[i]);
         if(errorCheck[i])
         {
             switch((i+1))
             {
                 case 1: return MISSING_ARGUMENT;
-                case 2: return UNRECOGNIZED_ARGUMENT;
+                case 2: return UNRECOGNIZED_ARGUMENT; break;
                 case 3: return DUPLICATE_ARGUMENT;
                 case 4: return INPUT_FILE_MISSING;
                 case 5: return OUTPUT_FILE_UNWRITABLE;
@@ -109,7 +110,6 @@ int main(int argc, char **argv)
                 case 9: return R_ARGUMENT_INVALID;
             }
         }
-
     }
 
     return 0;
