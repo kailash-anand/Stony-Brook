@@ -21,9 +21,9 @@ int main(int argc, char **argv)
     int countO = 0;
     int countP = 0;
     int countC = 0;
-    FILE *fp;
-    FILE *fp2;
-    char *argument;
+    // FILE *fp;
+    // FILE *fp2;
+    char *argument = 0;
     for(int i = 1; i < argc; i++)
     {
         argument = argv[i];
@@ -48,17 +48,17 @@ int main(int argc, char **argv)
             {
                 case 'i':
                     countI++;
-                    if((fp = fopen(argv[i+1], "r")) == NULL)
-                    {
-                        errorCheck[3] = 1;
-                    }
+                    // if((fp = fopen(argv[i+1], "r")) == NULL)
+                    // {
+                    //     errorCheck[3] = 1;
+                    // }
                     break;
                 case 'o':
                     countO++;
-                    if((fp2 = fopen(argv[i+1], "w")) == NULL)
-                    {
-                        errorCheck[4] = 1;
-                    }   
+                    // if((fp2 = fopen(argv[i+1], "w")) == NULL)
+                    // {
+                    //     errorCheck[4] = 1;
+                    // }   
                     break;
                 case 'c':
                     countC++;
@@ -101,23 +101,15 @@ int main(int argc, char **argv)
             switch((i+1))
             {
                 case 1: return MISSING_ARGUMENT;
-                        break;
                 case 2: return UNRECOGNIZED_ARGUMENT; 
-                        break;
                 case 3: return DUPLICATE_ARGUMENT;
-                        break;
                 case 4: return INPUT_FILE_MISSING;
-                        break;
                 case 5: return OUTPUT_FILE_UNWRITABLE;
-                        break;
                 case 6: return C_ARGUMENT_MISSING;
-                        break;
                 case 7: return C_ARGUMENT_INVALID;
-                        break;
                 case 8: return P_ARGUMENT_INVALID;
-                        break;
                 case 9: return R_ARGUMENT_INVALID;
-                        break;
+                        
             }
         }
     }
