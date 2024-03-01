@@ -96,11 +96,11 @@ int main(int argc, char **argv)
     {
         printf("%d", errorCheck[i]);
 
-        if(errorCheck[i])
+        if(errorCheck[i] == 1)
         {
             switch((i+1))
             {
-                case 1: return UNRECOGNIZED_ARGUMENT;
+                case 1: return MISSING_ARGUMENT;
                 case 2: return UNRECOGNIZED_ARGUMENT; 
                 case 3: return DUPLICATE_ARGUMENT;
                 case 4: return INPUT_FILE_MISSING;
