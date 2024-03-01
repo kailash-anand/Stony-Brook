@@ -11,6 +11,8 @@
 
 bool argInvalid(char *arg, char argument);
 
+void readAndWritePPM(char *input, char *output);
+
 int countDigits(char *str);
 
 int main(int argc, char **argv) 
@@ -21,8 +23,10 @@ int main(int argc, char **argv)
     int countO = 0;
     int countP = 0;
     int countC = 0;
-    FILE *fp;
-    FILE *fp2;
+    FILE *fp = NULL;
+    FILE *fp2 = NULL;
+    char *input = 0;
+    char *output = 0;
     char *argument = 0;
     for(int i = 1; i < argc; i++)
     {
@@ -52,13 +56,15 @@ int main(int argc, char **argv)
                     {
                         errorCheck[3] = 1;
                     }
+                    input = argv[i+1];
                     break;
                 case 'o':
                     countO++;
                     if((fp2 = fopen(argv[i+1], "w")) == NULL)
                     {
                         errorCheck[4] = 1;
-                    }   
+                    }
+                    output = argv[i+1];   
                     break;
                 case 'c':
                     countC++;
@@ -94,7 +100,6 @@ int main(int argc, char **argv)
 
     for(int i = 0; i < ERR_LENGTH; i++)
     {
-        printf("%d", errorCheck[i]);
 
         if(errorCheck[i] == 1)
         {
@@ -114,8 +119,21 @@ int main(int argc, char **argv)
         }
     }
 
+    if(fp != NULL)
+    {
+        fclose(fp);
+    }
+    
+    if(fp2 != NULL)
+    {
+        fclose(fp2);
+    }
+    
+    readAndWritePPM(input, output);
+
     return 0;
 }
+
 
 bool argInvalid(char *arg, char argument)
 {
@@ -176,4 +194,26 @@ int countDigits(char *str)
     }
 
     return count;
+}
+
+
+void readAndWritePPM(char *input, char *output)
+{
+    FILE *file1 = fopen(input, "r");
+    FILE *file2 = fopen(output, "w");
+
+    char title[2];
+
+    fscanf(file1,"%s", title);
+
+    unsigned int width = 0;
+    unsigned int height = 0;
+    unsigned int maxSize = 0;
+
+    fscanf(file1,"%u %u %u", &width, &height, &maxSize);
+
+    fclose(file1);
+
+    fprintf(file2,"%u",width);
+    //(void)file2;
 }

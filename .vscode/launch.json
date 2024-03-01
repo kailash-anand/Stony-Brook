@@ -8,7 +8,7 @@
             "program": "${workspaceRoot}/build/hw2_main",
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Build",
-            //"args": ["-i", "./tests/images/box.sbu", "-o", "./tests/images/box2.ppm"]
+            "args": ["-i", "./tests/images/desert.ppm", "-o", "./tests/expected_outputs/result.ppm"]
         },
         {
             "type": "cppdbg",
