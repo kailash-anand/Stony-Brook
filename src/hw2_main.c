@@ -202,18 +202,35 @@ void readAndWritePPM(char *input, char *output)
     FILE *file1 = fopen(input, "r");
     FILE *file2 = fopen(output, "w");
 
-    char title[2];
-
-    fscanf(file1,"%s", title);
-
+    char title[3];
     unsigned int width = 0;
     unsigned int height = 0;
     unsigned int maxSize = 0;
 
+    fscanf(file1,"%s", title);
     fscanf(file1,"%u %u %u", &width, &height, &maxSize);
+
+    unsigned int data[width*3*height];
+
+    for(unsigned int i = 0; i < width*3*height; i++)
+    {
+        fscanf(file1,"%u",&data[i]);
+    }
 
     fclose(file1);
 
-    fprintf(file2,"%u",width);
-    //(void)file2;
+    fprintf(file2,"%s\n",title);
+    fprintf(file2,"%u %u\n",width,height);
+    fprintf(file2,"%u\n",maxSize);
+
+    for(unsigned int j = 0; j < height; j++)
+    {
+        for(unsigned int k = 0; k < width*3; k++)
+        {
+            fprintf(file2,"%u ", data[(j*width*3) + k]);
+        }
+        fprintf(file2,"\n");
+    }
+
+    fclose(file2);
 }
