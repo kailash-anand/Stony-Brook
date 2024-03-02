@@ -13,11 +13,15 @@ bool argInvalid(char *arg, char argument);
 
 void readAndWritePPM(char *input, char *output);
 
+void readAndWriteSBU(char *input, char *output);
+
+bool fileEnds(char *file);
+
 int countDigits(char *str);
 
 int main(int argc, char **argv) 
 {
-    int errorCheck[9];
+    int errorCheck[9] = {0};
     const int ERR_LENGTH = 9;
     int countI = 0;
     int countO = 0;
@@ -100,7 +104,6 @@ int main(int argc, char **argv)
 
     for(int i = 0; i < ERR_LENGTH; i++)
     {
-
         if(errorCheck[i] == 1)
         {
             switch((i+1))
@@ -128,9 +131,16 @@ int main(int argc, char **argv)
     {
         fclose(fp2);
     }
-    
-    readAndWritePPM(input, output);
 
+    if(fileEnds(input) == 0 && fileEnds(output) == 0)
+    {
+        readAndWriteSBU(input, output);
+    }
+    else
+    {
+        readAndWritePPM(input, output);
+    }
+    
     return 0;
 }
 
@@ -196,6 +206,28 @@ int countDigits(char *str)
     return count;
 }
 
+bool fileEnds(char *file)
+{
+    char *temp = file;
+
+    while(*temp)
+    {
+        temp++;
+    }
+
+    temp--;
+    temp--;
+    temp--;
+    
+    if(strcmp(temp,"sbu"))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 void readAndWritePPM(char *input, char *output)
 {
@@ -233,4 +265,101 @@ void readAndWritePPM(char *input, char *output)
     }
 
     fclose(file2);
+}
+
+void readAndWriteSBU(char *input, char *output)
+{
+    FILE *file1 = fopen(input, "r");
+    FILE *file2 = fopen(output, "w");
+
+    char title[4];
+    unsigned int width = 0;
+    unsigned int height = 0;
+    unsigned int colorCount = 0;
+
+    fscanf(file1,"%s", title);
+    fscanf(file1,"%u %u %u", &width, &height, &colorCount);
+
+    int length = colorCount*3;
+    unsigned int colors[length];
+
+    for(int i = 0; i < length; i++)
+    {
+        fscanf(file1,"%u", &colors[i]);
+    }
+
+    length = width*height;
+    unsigned int data[width*height];
+    unsigned int count = 0;
+    unsigned int value = 0;
+
+    for(int i = 0; i < length; i++)
+    {
+        if(!fscanf(file1, "%u", &count))
+        {
+            fseek(file1,1,SEEK_CUR);
+            fscanf(file1,"%u",&count);
+            fscanf(file1,"%u", &value);
+
+            for(unsigned int j = 0; j < count; j++)
+            {
+                data[i] = value;
+                i++;
+            }
+            i--;  
+        }
+        else
+        {
+            data[i] = count;
+        }
+    }
+
+    fclose(file1);
+
+    fprintf(file2,"%s\n",title);
+    fprintf(file2,"%u %u\n",width,height);
+    fprintf(file2,"%u\n",colorCount);
+
+    length = colorCount*3;
+
+    for(int i = 0; i < length; i++)
+    {
+        fprintf(file2,"%u ", colors[i]);
+    }
+    fprintf(file2, "\n");
+
+    length = width*height;
+    count = 0;
+    value = 0;
+    bool here = false;
+
+    for(int i = 0; i < length; i++)
+    {
+        value = data[i];
+        here = false;
+
+        while(i < length-1 && data[i + 1] == data[i])
+        {
+            count++;
+            i++;
+            here = true;
+        }
+
+        if(here)
+        {
+            count++; 
+            fprintf(file2,"%s","*");
+            fprintf(file2,"%u ",count);
+            fprintf(file2,"%u ",value); 
+        }
+        else
+        {
+            fprintf(file2,"%u ", value);
+        }
+
+        value = 0;
+        count = 0;
+    }
+
+    (void)data;
 }
