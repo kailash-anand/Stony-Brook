@@ -422,7 +422,7 @@ void readSBUwritePPM(char *input, char *output)
     int index = 0;
     value = 0;
 
-    fprintf(file2,"PPM\n");
+    fprintf(file2,"P3\n");
     fprintf(file2,"%u %u\n",width,height);
     fprintf(file2,"%u\n",255);
 
@@ -437,4 +437,7 @@ void readSBUwritePPM(char *input, char *output)
             fprintf(file2, "%u ", colors[j]);
         }
     }
+    fprintf(file2,"\n");
+
+    fclose(file2);
 }
