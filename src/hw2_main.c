@@ -11,7 +11,7 @@
 
 bool argInvalid(char *arg, char argument);
 
-void readAndWritePPM(char *input, char *output);
+void readAndWritePPM(char *input, char *output, char *copy, char *paste);
 
 void readAndWriteSBU(char *input, char *output);
 
@@ -33,6 +33,8 @@ int main(int argc, char **argv)
     FILE *fp2 = NULL;
     char *input = 0;
     char *output = 0;
+    char *copy = 0;
+    char *paste = 0;
     char *argument = 0;
     for(int i = 1; i < argc; i++)
     {
@@ -75,10 +77,12 @@ int main(int argc, char **argv)
                 case 'c':
                     countC++;
                     errorCheck[6] = argInvalid(argv[i+1],'c');
+                    copy = argv[i+1];
                     break;
                 case 'p':
                     countP++;
                     errorCheck[7] = argInvalid(argv[i+1],'p');
+                    paste = argv[i+1];
                     break;
                 case 'r':
                     errorCheck[8] = argInvalid(argv[i+1],'r');
@@ -142,9 +146,13 @@ int main(int argc, char **argv)
     {
         readSBUwritePPM(input, output);
     }
+    else if(fileEnds(input) == 1 && fileEnds(output) == 0)
+    {
+        
+    }
     else
     {
-        readAndWritePPM(input, output);
+        readAndWritePPM(input, output, copy, paste);
     }
     
     return 0;
@@ -235,7 +243,7 @@ bool fileEnds(char *file)
     }
 }
 
-void readAndWritePPM(char *input, char *output)
+void readAndWritePPM(char *input, char *output, char *copy, char *paste)
 {
     FILE *file1 = fopen(input, "r");
     FILE *file2 = fopen(output, "w");
@@ -257,6 +265,24 @@ void readAndWritePPM(char *input, char *output)
 
     fclose(file1);
 
+    if(copy != 0)
+    {
+        int copyData[4];
+
+        char *temp = strtok(copy,",");
+        copyData[0] = atoi(temp);
+
+        for(int i = 1; i < 4; i++)
+        {
+            temp = strtok(NULL,",");
+            copyData[i] = atoi(temp);    
+        }
+
+        //printf("%d %d %d %d\n",copyData[0],copyData[1],copyData[2],copyData[3]);
+        (void)copyData;
+    }
+
+
     fprintf(file2,"%s\n",title);
     fprintf(file2,"%u %u\n",width,height);
     fprintf(file2,"%u\n",maxSize);
@@ -271,6 +297,8 @@ void readAndWritePPM(char *input, char *output)
     }
 
     fclose(file2);
+
+    (void)paste;
 }
 
 void readAndWriteSBU(char *input, char *output)
