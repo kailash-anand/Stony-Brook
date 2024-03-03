@@ -15,6 +15,8 @@ void readAndWritePPM(char *input, char *output);
 
 void readAndWriteSBU(char *input, char *output);
 
+void readSBUwritePPM(char *input, char *output);
+
 bool fileEnds(char *file);
 
 int countDigits(char *str);
@@ -135,6 +137,10 @@ int main(int argc, char **argv)
     if(fileEnds(input) == 0 && fileEnds(output) == 0)
     {
         readAndWriteSBU(input, output);
+    }
+    else if(fileEnds(input) == 0 && fileEnds(output) == 1)
+    {
+        readSBUwritePPM(input, output);
     }
     else
     {
@@ -361,5 +367,74 @@ void readAndWriteSBU(char *input, char *output)
         count = 0;
     }
 
-    (void)data;
+    fclose(file2);
+}
+
+void readSBUwritePPM(char *input, char *output)
+{
+    FILE *file1 = fopen(input, "r");
+    FILE *file2 = fopen(output, "w");
+
+    char title[4];
+    unsigned int width = 0;
+    unsigned int height = 0;
+    unsigned int colorCount = 0;
+
+    fscanf(file1,"%s", title);
+    fscanf(file1,"%u %u %u", &width, &height, &colorCount);
+
+    int length = colorCount*3;
+    unsigned int colors[length];
+
+    for(int i = 0; i < length; i++)
+    {
+        fscanf(file1,"%u", &colors[i]);
+    }
+
+    length = width*height;
+    unsigned int data[width*height];
+    unsigned int count = 0;
+    unsigned int value = 0;
+
+    for(int i = 0; i < length; i++)
+    {
+        if(!fscanf(file1, "%u", &count))
+        {
+            fseek(file1,1,SEEK_CUR);
+            fscanf(file1,"%u",&count);
+            fscanf(file1,"%u", &value);
+
+            for(unsigned int j = 0; j < count; j++)
+            {
+                data[i] = value;
+                i++;
+            }
+            i--;  
+        }
+        else
+        {
+            data[i] = count;
+        }
+    }
+
+    fclose(file1);
+
+    int index = 0;
+    value = 0;
+
+    fprintf(file2,"PPM\n");
+    fprintf(file2,"%u %u\n",width,height);
+    fprintf(file2,"%u\n",255);
+
+
+    for(int i =0; i < length; i++)
+    {
+        value = data[i];
+        index = value*3;
+
+        for(int j = index; j < index + 3; j++)
+        {
+            fprintf(file2, "%u ", colors[j]);
+        }
+    }
 }
