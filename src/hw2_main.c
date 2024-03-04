@@ -278,10 +278,53 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste)
             copyData[i] = atoi(temp);    
         }
 
-        //printf("%d %d %d %d\n",copyData[0],copyData[1],copyData[2],copyData[3]);
-        (void)copyData;
-    }
+        int startIndex = (copyData[0])*width*3 + copyData[1]*3;
+        int skip = width*3 - copyData[2]*3;
+        int length = copyData[2]*copyData[3]*3;
+        unsigned int copiedData[length];
+        int index = 0;
 
+        for(int i = 0; i < copyData[3]; i++)
+        {
+            for(int j = 0; j < copyData[2]*3; j++)
+            {
+                copiedData[index] = data[startIndex];
+                startIndex++;
+                index++;
+            }
+
+            startIndex += skip;
+        }
+
+        for(int i = 0; i < length; i++)
+        {
+            printf("%u ", copiedData[i]);
+        }
+
+        int pasteRow, pasteColoumn;
+
+        temp = strtok(paste,",");
+        pasteRow = atoi(temp);
+
+        temp = strtok(NULL,",");
+        pasteColoumn = atoi(temp);
+
+        startIndex = (pasteRow)*width*3 + pasteColoumn*3;
+        skip = width*3 - copyData[2]*3;
+        index = 0;
+        
+        for(int i = 0; i < copyData[3]; i++)
+        {
+            for(int j = 0; j < copyData[2]*3; j++)
+            {
+               data[startIndex] = copiedData[index];
+               startIndex++;
+               index++;
+            }
+
+            startIndex += skip;
+        }
+    }
 
     fprintf(file2,"%s\n",title);
     fprintf(file2,"%u %u\n",width,height);
