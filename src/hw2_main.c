@@ -295,12 +295,7 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste)
 
             startIndex += skip;
         }
-
-        for(int i = 0; i < length; i++)
-        {
-            printf("%u ", copiedData[i]);
-        }
-
+        
         int pasteRow, pasteColoumn;
 
         temp = strtok(paste,",");
