@@ -278,7 +278,17 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste)
             copyData[i] = atoi(temp);    
         }
 
-        int startIndex = (copyData[0])*width*3 + copyData[1]*3;
+        if(((unsigned)copyData[2]*3) > (width*3 - copyData[1]*3))
+        {
+            copyData[2] = width - copyData[1];
+        }
+
+        if(((unsigned)copyData[3]*3) > (height*3 - copyData[0]*3))
+        {
+            copyData[3] = height - copyData[0];
+        }
+
+        unsigned int startIndex = (copyData[0])*width*3 + copyData[1]*3;
         int skip = width*3 - copyData[2]*3;
         int length = copyData[2]*copyData[3]*3;
         unsigned int copiedData[length];
@@ -295,7 +305,7 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste)
 
             startIndex += skip;
         }
-        
+
         int pasteRow, pasteColoumn;
 
         temp = strtok(paste,",");
