@@ -15,7 +15,7 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste);
 
 void readAndWriteSBU(char *input, char *output);
 
-void readSBUwritePPM(char *input, char *output);
+void readSBUwritePPM(char *input, char *output, char *copy, char *paste);
 
 bool fileEnds(char *file);
 
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
     }
     else if(fileEnds(input) == 0 && fileEnds(output) == 1)
     {
-        readSBUwritePPM(input, output);
+        readSBUwritePPM(input, output, copy, paste);
     }
     else if(fileEnds(input) == 1 && fileEnds(output) == 0)
     {
@@ -246,7 +246,6 @@ bool fileEnds(char *file)
 void readAndWritePPM(char *input, char *output, char *copy, char *paste)
 {
     FILE *file1 = fopen(input, "r");
-    FILE *file2 = fopen(output, "w");
 
     char title[3];
     unsigned int width = 0;
@@ -341,6 +340,8 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste)
         }
     }
 
+    FILE *file2 = fopen(output, "w");
+
     fprintf(file2,"%s\n",title);
     fprintf(file2,"%u %u\n",width,height);
     fprintf(file2,"%u\n",maxSize);
@@ -355,8 +356,6 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste)
     }
 
     fclose(file2);
-
-    (void)paste;
 }
 
 void readAndWriteSBU(char *input, char *output)
@@ -456,7 +455,7 @@ void readAndWriteSBU(char *input, char *output)
     fclose(file2);
 }
 
-void readSBUwritePPM(char *input, char *output)
+void readSBUwritePPM(char *input, char *output, char *copy, char *paste)
 {
     FILE *file1 = fopen(input, "r");
     FILE *file2 = fopen(output, "w");
@@ -524,6 +523,121 @@ void readSBUwritePPM(char *input, char *output)
         }
     }
     fprintf(file2,"\n");
-
     fclose(file2);
+
+    FILE *file3 = fopen(output, "r");
+
+    char title1[3];
+    unsigned int width1 = 0;
+    unsigned int height1 = 0;
+    unsigned int maxSize1 = 0;
+
+    fscanf(file3,"%s", title1);
+    fscanf(file3,"%u %u %u", &width1, &height1, &maxSize1);
+
+    unsigned int data1[width1*3*height1];
+
+    for(unsigned int i = 0; i < width1*3*height1; i++)
+    {
+        fscanf(file3,"%u",&data1[i]);
+    }
+
+    fclose(file3);
+
+    if(copy != 0)
+    {
+        int copyData[4];
+
+        char *temp = strtok(copy,",");
+        copyData[0] = atoi(temp);
+
+        for(int i = 1; i < 4; i++)
+        {
+            temp = strtok(NULL,",");
+            copyData[i] = atoi(temp);    
+        }
+
+        int pasteRow, pasteColoumn;
+
+        temp = strtok(paste,",");
+        pasteRow = atoi(temp);
+
+        temp = strtok(NULL,",");
+        pasteColoumn = atoi(temp);
+
+        if(((unsigned)copyData[2]*3) > (width*3 - copyData[1]*3))
+        {
+            copyData[2] = width - copyData[1];
+        }
+
+        if(((unsigned)copyData[3]*3) > (height*3 - copyData[0]*3))
+        {
+            copyData[3] = height - copyData[0];
+        }
+
+        if(((unsigned)copyData[2]*3) > (width*3 - pasteColoumn*3))
+        {
+            copyData[2] = width - pasteColoumn;
+        }
+
+        unsigned int startIndex = (copyData[0])*width*3 + copyData[1]*3;
+        int skip = width*3 - copyData[2]*3;
+        int length2 = copyData[2]*copyData[3]*3;
+        unsigned int copiedData[length2];
+        int index2 = 0;
+
+        for(int i = 0; i < copyData[3]; i++)
+        {
+            for(int j = 0; j < copyData[2]*3; j++)
+            {
+                copiedData[index2] = data1[startIndex];
+                startIndex++;
+                index2++;
+            }
+
+            startIndex += skip;
+        }
+
+        if(((unsigned)copyData[3]*3) > (height*3 - pasteRow*3))
+        {
+            copyData[3] = height - pasteRow;
+        }
+
+        startIndex = (pasteRow)*width*3 + pasteColoumn*3;
+        skip = width*3 - copyData[2]*3;
+        index2 = 0;
+        
+        for(int i = 0; i < copyData[3]; i++)
+        {
+            for(int j = 0; j < copyData[2]*3; j++)
+            {
+               data1[startIndex] = copiedData[index2];
+               startIndex++;
+               index2++;
+            }
+
+            startIndex += skip;
+        }
+    }
+
+    FILE *file4 = fopen(output, "w");
+
+    fprintf(file4,"%s\n",title1);
+    fprintf(file4,"%u %u\n",width1,height1);
+    fprintf(file4,"%u\n",maxSize1);
+
+    for(unsigned int j = 0; j < height1; j++)
+    {
+        for(unsigned int k = 0; k < width1*3; k++)
+        {
+            fprintf(file4,"%u ", data1[(j*width1*3) + k]);
+        }
+        fprintf(file4,"\n");
+    }
+
+    fclose(file4);
+
+    //readAndWritePPM(output, output, copy, paste);
+    (void)copy;
+    (void)paste;
 }
