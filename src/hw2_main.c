@@ -17,7 +17,7 @@ void readAndWriteSBU(char *input, char *output);
 
 void readSBUwritePPM(char *input, char *output, char *copy, char *paste);
 
-void readPPMwriteSBU(char *input, char *output);
+void readPPMwriteSBU(char *input, char *output, char *copy, char *paste);
 
 bool fileEnds(char *file);
 
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
     }
     else if (fileEnds(input) == 1 && fileEnds(output) == 0)
     {
-        readPPMwriteSBU(input, output);
+        readPPMwriteSBU(input, output, copy, paste);
     }
     else
     {
@@ -650,7 +650,7 @@ void readSBUwritePPM(char *input, char *output, char *copy, char *paste)
     fclose(file4);
 }
 
-void readPPMwriteSBU(char *input, char *output)
+void readPPMwriteSBU(char *input, char *output, char *copy, char *paste)
 {
     FILE *file1 = fopen(input, "r");
     FILE *file2 = fopen(output, "w");
@@ -671,6 +671,82 @@ void readPPMwriteSBU(char *input, char *output)
     }
 
     fclose(file1);
+
+    if (copy != 0)
+    {
+        int copyData[4];
+
+        char *temp = strtok(copy, ",");
+        copyData[0] = atoi(temp);
+
+        for (int i = 1; i < 4; i++)
+        {
+            temp = strtok(NULL, ",");
+            copyData[i] = atoi(temp);
+        }
+
+        int pasteRow, pasteColoumn;
+
+        temp = strtok(paste, ",");
+        pasteRow = atoi(temp);
+
+        temp = strtok(NULL, ",");
+        pasteColoumn = atoi(temp);
+
+        if (((unsigned)copyData[2] * 3) > (width * 3 - copyData[1] * 3))
+        {
+            copyData[2] = width - copyData[1];
+        }
+
+        if (((unsigned)copyData[3] * 3) > (height * 3 - copyData[0] * 3))
+        {
+            copyData[3] = height - copyData[0];
+        }
+
+        if (((unsigned)copyData[2] * 3) > (width * 3 - pasteColoumn * 3))
+        {
+            copyData[2] = width - pasteColoumn;
+        }
+
+        unsigned int startIndex = (copyData[0]) * width * 3 + copyData[1] * 3;
+        int skip = width * 3 - copyData[2] * 3;
+        int length = copyData[2] * copyData[3] * 3;
+        unsigned int copiedData[length];
+        int index = 0;
+
+        for (int i = 0; i < copyData[3]; i++)
+        {
+            for (int j = 0; j < copyData[2] * 3; j++)
+            {
+                copiedData[index] = data[startIndex];
+                startIndex++;
+                index++;
+            }
+
+            startIndex += skip;
+        }
+
+        if (((unsigned)copyData[3] * 3) > (height * 3 - pasteRow * 3))
+        {
+            copyData[3] = height - pasteRow;
+        }
+
+        startIndex = (pasteRow)*width * 3 + pasteColoumn * 3;
+        skip = width * 3 - copyData[2] * 3;
+        index = 0;
+
+        for (int i = 0; i < copyData[3]; i++)
+        {
+            for (int j = 0; j < copyData[2] * 3; j++)
+            {
+                data[startIndex] = copiedData[index];
+                startIndex++;
+                index++;
+            }
+
+            startIndex += skip;
+        }
+    }
 
     unsigned int colors[width * 3 * height];
     unsigned int colorCount = 0;
