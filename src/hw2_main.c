@@ -13,7 +13,7 @@ bool argInvalid(char *arg, char argument);
 
 void readAndWritePPM(char *input, char *output, char *copy, char *paste);
 
-void readAndWriteSBU(char *input, char *output);
+void readAndWriteSBU(char *input, char *output, char *copy, char *paste);
 
 void readSBUwritePPM(char *input, char *output, char *copy, char *paste);
 
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 
     if (fileEnds(input) == 0 && fileEnds(output) == 0)
     {
-        readAndWriteSBU(input, output);
+        readAndWriteSBU(input, output, copy, paste);
     }
     else if (fileEnds(input) == 0 && fileEnds(output) == 1)
     {
@@ -371,10 +371,9 @@ void readAndWritePPM(char *input, char *output, char *copy, char *paste)
     fclose(file2);
 }
 
-void readAndWriteSBU(char *input, char *output)
+void readAndWriteSBU(char *input, char *output, char *copy, char *paste)
 {
     FILE *file1 = fopen(input, "r");
-    FILE *file2 = fopen(output, "w");
 
     char title[4];
     unsigned int width = 0;
@@ -420,52 +419,260 @@ void readAndWriteSBU(char *input, char *output)
 
     fclose(file1);
 
-    fprintf(file2, "%s\n", title);
-    fprintf(file2, "%u %u\n", width, height);
-    fprintf(file2, "%u\n", colorCount);
+    /* Writing to PPM Seperately */
+    FILE *file3 = fopen("./tests/actual_outputs/temp.ppm", "w");
 
-    length = colorCount * 3;
-
-    for (int i = 0; i < length; i++)
-    {
-        fprintf(file2, "%u ", colors[i]);
-    }
-    fprintf(file2, "\n");
-
-    length = width * height;
-    count = 0;
+    int index = 0;
     value = 0;
-    bool here = false;
+
+    fprintf(file3, "P3\n");
+    fprintf(file3, "%u %u\n", width, height);
+    fprintf(file3, "%u\n", 255);
 
     for (int i = 0; i < length; i++)
     {
         value = data[i];
+        index = value * 3;
+
+        for (int j = index; j < index + 3; j++)
+        {
+            fprintf(file3, "%u ", colors[j]);
+        }
+    }
+    fprintf(file3, "\n");
+    fclose(file3);
+    /* Writing to PPM Seperately */
+
+    /* Reading from the seperate PPM */
+    FILE *file4 = fopen("./tests/actual_outputs/temp.ppm", "r");
+
+    char title1[3];
+    unsigned int width1 = 0;
+    unsigned int height1 = 0;
+    unsigned int maxSize1 = 0;
+
+    fscanf(file4, "%s", title1);
+    fscanf(file4, "%u %u %u", &width1, &height1, &maxSize1);
+
+    unsigned int data1[width1 * 3 * height1];
+
+    for (unsigned int i = 0; i < width1 * 3 * height1; i++)
+    {
+        fscanf(file4, "%u", &data1[i]);
+    }
+
+    fclose(file4);
+    /* Reading from the seperate PPM */
+
+    /* Copy pasting in the sperate PPM */
+     if (copy != 0)
+    {
+        int copyData[4];
+
+        char *temp = strtok(copy, ",");
+        copyData[0] = atoi(temp);
+
+        for (int i = 1; i < 4; i++)
+        {
+            temp = strtok(NULL, ",");
+            copyData[i] = atoi(temp);
+        }
+
+        int pasteRow, pasteColoumn;
+
+        temp = strtok(paste, ",");
+        pasteRow = atoi(temp);
+
+        temp = strtok(NULL, ",");
+        pasteColoumn = atoi(temp);
+
+        if (((unsigned)copyData[2] * 3) > (width1 * 3 - copyData[1] * 3))
+        {
+            copyData[2] = width1 - copyData[1];
+        }
+
+        if (((unsigned)copyData[3] * 3) > (height1 * 3 - copyData[0] * 3))
+        {
+            copyData[3] = height1 - copyData[0];
+        }
+
+        if (((unsigned)copyData[2] * 3) > (width1 * 3 - pasteColoumn * 3))
+        {
+            copyData[2] = width1 - pasteColoumn;
+        }
+
+        unsigned int startIndex = (copyData[0]) * width1 * 3 + copyData[1] * 3;
+        int skip = width1 * 3 - copyData[2] * 3;
+        int length2 = copyData[2] * copyData[3] * 3;
+        unsigned int copiedData[length2];
+        int index2 = 0;
+
+        for (int i = 0; i < copyData[3]; i++)
+        {
+            for (int j = 0; j < copyData[2] * 3; j++)
+            {
+                copiedData[index2] = data1[startIndex];
+                startIndex++;
+                index2++;
+            }
+
+            startIndex += skip;
+        }
+
+        if (((unsigned)copyData[3] * 3) > (height * 3 - pasteRow * 3))
+        {
+            copyData[3] = height1 - pasteRow;
+        }
+
+        startIndex = (pasteRow)*width1 * 3 + pasteColoumn * 3;
+        skip = width1 * 3 - copyData[2] * 3;
+        index2 = 0;
+
+        for (int i = 0; i < copyData[3]; i++)
+        {
+            for (int j = 0; j < copyData[2] * 3; j++)
+            {
+                data1[startIndex] = copiedData[index2];
+                startIndex++;
+                index2++;
+            }
+
+            startIndex += skip;
+        }
+    }
+    /* Copy pasting in the seperate PPM*/
+
+    FILE *file2 = fopen(output, "w");
+    unsigned int colors2[width1 * 3 * height1];
+    unsigned int colorCount2 = 0;
+    unsigned int currentPixel[3];
+    unsigned int index2 = 0;
+
+    for (unsigned int i = 0; i < (width1 * 3 * height1 - 2); i += 3)
+    {
+        currentPixel[0] = data1[i];
+        currentPixel[1] = data1[i + 1];
+        currentPixel[2] = data1[i + 2];
+
+        if (!colorExists(currentPixel, colors2, colorCount2))
+        {
+            colors2[index2] = currentPixel[0];
+            index2++;
+            colors2[index2] = currentPixel[1];
+            index2++;
+            colors2[index2] = currentPixel[2];
+            index2++;
+            colorCount2++;
+        }
+    }
+
+    unsigned int pixels[width1*height1];
+
+    for (unsigned int i = 0; i < (width1 * height1); i++)
+    {
+        currentPixel[0] = data1[i * 3];     
+        currentPixel[1] = data1[i * 3 + 1]; 
+        currentPixel[2] = data1[i * 3 + 2]; 
+
+        pixels[i] = findPixelIndex(currentPixel, colors2, colorCount2); 
+    }
+
+    fprintf(file2, "%s\n", "SBU");
+    fprintf(file2, "%u %u\n", width1, height1);
+    fprintf(file2, "%u\n", colorCount2);
+
+    int length3 = colorCount2 * 3;
+
+    for (int i = 0; i < length3; i++)
+    {
+        fprintf(file2, "%u ", colors2[i]);
+    }
+    fprintf(file2, "\n");
+
+    length3 = width1 * height1;
+    int count3 = 0;
+    int value3 = 0;
+    bool here = false;
+
+    for (int i = 0; i < length3; i++)
+    {
+        value3 = pixels[i];
         here = false;
 
-        while (i < length - 1 && data[i + 1] == data[i])
+        while (i < length3 - 1 && pixels[i + 1] == pixels[i])
         {
-            count++;
+            count3++;
             i++;
             here = true;
         }
 
         if (here)
         {
-            count++;
+            count3++;
             fprintf(file2, "%s", "*");
-            fprintf(file2, "%u ", count);
-            fprintf(file2, "%u ", value);
+            fprintf(file2, "%u ", count3);
+            fprintf(file2, "%u ", value3);
         }
         else
         {
-            fprintf(file2, "%u ", value);
+            fprintf(file2, "%u ", value3);
         }
 
-        value = 0;
-        count = 0;
+        value3 = 0;
+        count3 = 0;
     }
 
-    fclose(file2);
+    fclose(file2);    
+    /* Verifying the copy paste in PPM */
+
+    // FILE *file2 = fopen(output, "w");
+
+    // fprintf(file2, "%s\n", title);
+    // fprintf(file2, "%u %u\n", width, height);
+    // fprintf(file2, "%u\n", colorCount);
+
+    // length = colorCount * 3;
+
+    // for (int i = 0; i < length; i++)
+    // {
+    //     fprintf(file2, "%u ", colors[i]);
+    // }
+    // fprintf(file2, "\n");
+
+    // length = width * height;
+    // count = 0;
+    // value = 0;
+    // bool here = false;
+
+    // for (int i = 0; i < length; i++)
+    // {
+    //     value = data[i];
+    //     here = false;
+
+    //     while (i < length - 1 && data[i + 1] == data[i])
+    //     {
+    //         count++;
+    //         i++;
+    //         here = true;
+    //     }
+
+    //     if (here)
+    //     {
+    //         count++;
+    //         fprintf(file2, "%s", "*");
+    //         fprintf(file2, "%u ", count);
+    //         fprintf(file2, "%u ", value);
+    //     }
+    //     else
+    //     {
+    //         fprintf(file2, "%u ", value);
+    //     }
+
+    //     value = 0;
+    //     count = 0;
+    // }
+
+    // fclose(file2);
 }
 
 void readSBUwritePPM(char *input, char *output, char *copy, char *paste)
