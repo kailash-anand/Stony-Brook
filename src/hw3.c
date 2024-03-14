@@ -9,6 +9,8 @@
 
 #define DEBUG(...) fprintf(stderr, "[          ] [ DEBUG ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, " -- %s()\n", __func__)
 
+bool isBoardEmpty = true;
+
 bool validateInput(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed);
 
 GameState* initialize_game_state(const char *filename) {
@@ -30,6 +32,12 @@ GameState* initialize_game_state(const char *filename) {
         while(currentValue != '\n')
         {
             fscanf(game, "%c", &currentValue);
+
+            if(currentValue != '.' || currentValue != '\n')
+            {
+                isBoardEmpty = false;
+            }
+
             if(currentValue != '\n')
             { numCols++; }
         }
@@ -267,6 +275,25 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
     if(!(direction == 'H' || direction == 'V'))
     {
         return true;
+    }
+
+    if(!isBoardEmpty)
+    {
+        int length = strlen(tiles);
+        int count = 0;
+
+        for(int i = 0; i < length; i++)
+        {
+            if(game->board[row][col][0] == '.')
+            {
+                count++;
+            }
+        }
+
+        if(count == length || count == 0)
+        {
+            return true;
+        }
     }
 
     (void)tiles;
