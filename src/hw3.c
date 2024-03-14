@@ -70,6 +70,11 @@ GameState* initialize_game_state(const char *filename) {
 
     while(1)
     {
+        if(currentValue == EOF)
+        {
+            break;
+        }
+        
         secondIndex = 0;
         while(currentValue != '\n')
         {
