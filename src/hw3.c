@@ -3,10 +3,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "hw3.h" 
 
 #define DEBUG(...) fprintf(stderr, "[          ] [ DEBUG ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, " -- %s()\n", __func__)
+
+bool validateInput(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed);
 
 GameState* initialize_game_state(const char *filename) {
     FILE *game = fopen(filename, "r");
@@ -74,7 +77,7 @@ GameState* initialize_game_state(const char *filename) {
         {
             break;
         }
-        
+
         secondIndex = 0;
         while(currentValue != '\n')
         {
@@ -114,12 +117,78 @@ GameState* initialize_game_state(const char *filename) {
 }
 
 GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed) {
-    (void)game;
-    (void)row;
-    (void)col;
-    (void)direction;
-    (void)tiles;
-    (void)num_tiles_placed;
+    bool check = false;
+    check = validateInput(game, row, col, direction, tiles, num_tiles_placed);
+
+    if(check)
+    {
+        return game;
+    }
+
+    int countTiles = 0;
+    const char *temp = tiles;
+    int startRow = row;
+    int startCol = col;
+    int heightIndex = 0;
+
+    if(direction == 'H')
+    {
+        while(*temp)
+        {
+            if(*temp != ' ')
+            {
+                heightIndex = 0;
+                if(game->board[startRow][startCol][heightIndex] != '.')
+                {
+                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    {
+                        heightIndex++;
+                    }
+                }
+
+                game->board[startRow][startCol][heightIndex] = *temp;
+                game->noOfTiles[startRow][startCol] = heightIndex + 1;
+                countTiles++;
+            }
+            
+            startCol++;
+            temp++;
+
+            if(startCol > game->cols)
+            {
+                break;
+            }
+        }
+    }
+    else
+    {
+        while(*temp)
+        {
+            if(*temp != ' ')
+            {
+                heightIndex = 0;
+                if(game->board[startRow][startCol][heightIndex] != '.')
+                {
+                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    {
+                        heightIndex++;
+                    }
+                }
+
+                game->board[startRow][startCol][heightIndex] = *temp;
+                countTiles++;
+            }
+            
+            startRow++;
+            temp++;
+
+            if(startRow > game->rows)
+            {
+                break;
+            }
+        }
+    }
+
     return game;
 }
 
@@ -146,12 +215,23 @@ void free_game_state(GameState *game) {
 
 void save_game_state(GameState *game, const char *filename) {
     FILE *save = fopen(filename, "w");
+    int heightIndex = 0;
 
     for(int i = 0; i < game->rows; i++)
     {
         for(int j = 0; j < game->cols; j++)
         {
-            fprintf(save, "%c ", game->board[i][j][0]);
+            heightIndex = 0;
+            if(game->board[i][j][heightIndex] != '.')
+            {
+                while(isalpha(game->board[i][j][heightIndex]))
+                {
+                    heightIndex++;
+                }
+                heightIndex--;
+            }
+            
+            fprintf(save, "%c ", game->board[i][j][heightIndex]);
         }
 
         fprintf(save, "\n");
@@ -168,4 +248,26 @@ void save_game_state(GameState *game, const char *filename) {
     }
 
     fclose(save);
+}
+
+bool validateInput(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed)
+{
+    if(row < 0 || col < 0)
+    {
+        return true;
+    }
+
+    if(row >= game->rows || col >= game->cols)
+    {
+        return true;
+    }
+
+    if(!(direction == 'H' || direction == 'V'))
+    {
+        return true;
+    }
+
+    (void)tiles;
+    (void)num_tiles_placed;
+    return false;
 }
