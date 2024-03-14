@@ -13,6 +13,8 @@ bool isBoardEmpty = true;
 
 bool validateInput(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed);
 
+GameState* resizeBoard(GameState *game, int horizontal, int vertical);
+
 GameState* initialize_game_state(const char *filename) {
     FILE *game = fopen(filename, "r");
 
@@ -143,6 +145,12 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     {
         while(*temp)
         {
+            if((startCol + 1) > game->cols)
+            {
+                int extra = strlen(tiles) - (startCol - col);
+                game = resizeBoard(game, extra, 0);
+            }
+
             if(*temp != ' ')
             {
                 heightIndex = 0;
@@ -161,17 +169,18 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
             
             startCol++;
             temp++;
-
-            if((startCol + 1) > game->cols)
-            {
-                break;
-            }
         }
     }
     else
     {
         while(*temp)
         {
+            if((startRow + 1) > game->rows)
+            {
+                int extra = strlen(tiles) - (startRow - row);
+                game = resizeBoard(game, 0, extra);
+            }
+
             if(*temp != ' ')
             {
                 heightIndex = 0;
@@ -190,11 +199,6 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
             
             startRow++;
             temp++;
-
-            if((startRow + 1) > game->rows)
-            {
-                break;
-            }
         }
     }
 
@@ -277,26 +281,93 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
         return true;
     }
 
-    if(!isBoardEmpty)
-    {
-        int length = strlen(tiles);
-        int count = 0;
+    // if(!isBoardEmpty)
+    // {
+    //     int length = strlen(tiles);
+    //     int count = 0;
 
-        for(int i = 0; i < length; i++)
-        {
-            if(game->board[row][col][0] == '.')
-            {
-                count++;
-            }
-        }
+    //     for(int i = 0; i < length; i++)
+    //     {
+    //         if(game->board[row][col][0] == '.')
+    //         {
+    //             count++;
+    //         }
+    //     }
 
-        if(count == length || count == 0)
-        {
-            return true;
-        }
-    }
+    //     if(count == length || count == 0)
+    //     {
+    //         return true;
+    //     }
+    // }
 
     (void)tiles;
     (void)num_tiles_placed;
     return false;
+}
+
+GameState* resizeBoard(GameState *game, int horizontal, int vertical)
+{
+    if(horizontal != 0)
+    {
+        int memory = game->rows*(game->cols + horizontal)*5 + game->rows*(game->cols + horizontal)*5*4;
+        game = realloc(game, memory);
+
+        for(int i = 0; i < game->rows; i++)
+        {
+            game->board[i] = realloc(game->board[i], (game->cols + horizontal) * sizeof(char *));
+            game->noOfTiles[i] = realloc(game->noOfTiles[i], (game->cols + horizontal) * sizeof(int *));
+
+            for(int j = game->cols; j < game->cols + horizontal; j++)
+            {
+                game->board[i][j] = calloc(5, sizeof(char) * 5);
+            }
+        }
+
+        for(int i = 0; i < game->rows; i++)
+        {
+            for(int j = game->cols; j < (game->cols + horizontal); j++)
+            {
+                game->board[i][j][0] = '.';
+                game->noOfTiles[i][j] = 0;
+            }
+        }
+
+        game->cols = game->cols + horizontal;
+
+        return game;
+    }
+
+    if(vertical != 0)
+    {
+        int memory = (game->rows + vertical)*(game->cols)*5 + (game->rows + vertical)*(game->cols)*5*4;
+        game = realloc(game, memory);
+
+        game->board = realloc(game->board, (game->rows + vertical) * sizeof(char **));
+        game->noOfTiles = realloc(game->noOfTiles, (game->rows + vertical) * sizeof(int *));
+        for(int i = game->rows; i < (game->rows + vertical); i++)
+        {
+            game->board[i] = malloc((game->cols) * sizeof(char *));
+            game->noOfTiles[i] = malloc((game->cols) * sizeof(int *));
+
+            for(int j = 0; j < game->cols; j++)
+            {
+                game->board[i][j] = calloc(5, sizeof(char) * 5);
+            }
+        }
+
+        for(int i = game->rows; i < game->rows + vertical; i++)
+        {
+            for(int j = 0; j < (game->cols); j++)
+            {
+                game->board[i][j][0] = '.';
+                game->noOfTiles[i][j] = 0;
+            }
+        }
+
+        game->rows = game->rows + vertical;
+
+        return game;
+    }
+
+    return game;
 }
