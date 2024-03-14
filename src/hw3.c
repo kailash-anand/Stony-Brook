@@ -61,7 +61,7 @@ GameState* initialize_game_state(const char *filename) {
 
         for(int j = 0; j < numCols; j++)
         {
-            (*newState).board[i][j] = malloc(sizeof(char) * 5);
+            (*newState).board[i][j] = calloc(5, sizeof(char) * 5);
         }
     }
 
@@ -154,7 +154,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
             startCol++;
             temp++;
 
-            if(startCol > game->cols)
+            if((startCol + 1) > game->cols)
             {
                 break;
             }
@@ -182,13 +182,14 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
             startRow++;
             temp++;
 
-            if(startRow > game->rows)
+            if((startRow + 1) > game->rows)
             {
                 break;
             }
         }
     }
 
+    *num_tiles_placed = countTiles;
     return game;
 }
 
@@ -231,7 +232,7 @@ void save_game_state(GameState *game, const char *filename) {
                 heightIndex--;
             }
             
-            fprintf(save, "%c ", game->board[i][j][heightIndex]);
+            fprintf(save, "%c", game->board[i][j][heightIndex]);
         }
 
         fprintf(save, "\n");
@@ -241,7 +242,7 @@ void save_game_state(GameState *game, const char *filename) {
     {
         for(int j = 0; j < game->cols; j++)
         {
-            fprintf(save, "%d ", game->noOfTiles[i][j]);
+            fprintf(save, "%d", game->noOfTiles[i][j]);
         }
 
         fprintf(save, "\n");
