@@ -176,6 +176,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
                 }
 
                 game->board[startRow][startCol][heightIndex] = *temp;
+                game->noOfTiles[startRow][startCol] = heightIndex + 1;
                 countTiles++;
             }
             
