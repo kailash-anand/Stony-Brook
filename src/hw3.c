@@ -312,6 +312,11 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                     {
                         return true;
                     }
+
+                    if(game->board[startRow][startCol][heightIndex - 1] == *temp)
+                    {
+                        return true;
+                    }
                 }
 
                 countTiles++;
@@ -341,6 +346,11 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                     }
                     
                     if(heightIndex > 4)
+                    {
+                        return true;
+                    }
+
+                    if(game->board[startRow][startCol][heightIndex - 1] == *temp)
                     {
                         return true;
                     }
