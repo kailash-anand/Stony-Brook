@@ -2,6 +2,7 @@
 
 typedef struct GameState
 {
+    int isBoardEmpty;
     int rows, cols;
     int **noOfTiles;
     char ***board;

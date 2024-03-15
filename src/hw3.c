@@ -5,17 +5,19 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "hw3.h" 
+#include "hw3.h"
 
-#define DEBUG(...) fprintf(stderr, "[          ] [ DEBUG ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, " -- %s()\n", __func__)
-
-bool isBoardEmpty = true;
+#define DEBUG(...)                              \
+    fprintf(stderr, "[          ] [ DEBUG ] "); \
+    fprintf(stderr, __VA_ARGS__);               \
+    fprintf(stderr, " -- %s()\n", __func__)
 
 bool validateInput(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed);
 
-GameState* resizeBoard(GameState *game, int horizontal, int vertical);
+GameState *resizeBoard(GameState *game, int horizontal, int vertical);
 
-GameState* initialize_game_state(const char *filename) {
+GameState *initialize_game_state(const char *filename)
+{
     FILE *game = fopen(filename, "r");
 
     GameState *newState = NULL;
@@ -25,23 +27,19 @@ GameState* initialize_game_state(const char *filename) {
     int secondIndex = 0;
     int thirdIndex = 0;
 
-
     int numRows = 0;
     int numCols = 0;
 
-    while(1)
+    while (1)
     {
-        while(currentValue != '\n')
+        while (currentValue != '\n')
         {
             fscanf(game, "%c", &currentValue);
 
-            if(currentValue != '.' || currentValue != '\n')
+            if (currentValue != '\n')
             {
-                isBoardEmpty = false;
+                numCols++;
             }
-
-            if(currentValue != '\n')
-            { numCols++; }
         }
 
         numRows++;
@@ -49,27 +47,26 @@ GameState* initialize_game_state(const char *filename) {
         fseek(game, ftell(game), SEEK_SET);
 
         fscanf(game, "%c", &currentValue);
-        if(currentValue == '\n')
+        if (currentValue == '\n')
         {
             break;
         }
 
         fseek(game, -1, SEEK_CUR);
     }
-    numCols = numCols/numRows;
+    numCols = numCols / numRows;
 
-    int memory = numRows*numCols*5 + numRows*numCols*5*4;
+    int memory = numRows * numCols * 5 + numRows * numCols * 5 * 4;
     newState = malloc(memory);
-
 
     (*newState).board = malloc(sizeof(char **) * numRows);
     (*newState).noOfTiles = malloc(sizeof(int *) * numRows);
-    for(int i = 0; i < numRows; i++)
+    for (int i = 0; i < numRows; i++)
     {
         (*newState).board[i] = malloc(sizeof(char *) * numCols);
         (*newState).noOfTiles[i] = malloc(sizeof(int) * numCols);
 
-        for(int j = 0; j < numCols; j++)
+        for (int j = 0; j < numCols; j++)
         {
             (*newState).board[i][j] = calloc(5, sizeof(char) * 5);
         }
@@ -80,28 +77,30 @@ GameState* initialize_game_state(const char *filename) {
 
     fseek(game, 0, SEEK_SET);
     currentValue = 0;
+    newState->isBoardEmpty = 1;
 
-    while(1)
+    while (1)
     {
-        if(currentValue == EOF)
+        if (currentValue == EOF)
         {
             break;
         }
 
         secondIndex = 0;
-        while(currentValue != '\n')
+        while (currentValue != '\n')
         {
             fscanf(game, "%c", &currentValue);
-            if(currentValue != '\n')
-            { 
+            if (currentValue != '\n')
+            {
                 (*newState).board[firstIndex][secondIndex][thirdIndex] = currentValue;
 
-                if(currentValue == '.')
+                if (currentValue == '.')
                 {
                     (*newState).noOfTiles[firstIndex][secondIndex] = 0;
-                } 
+                }
                 else
                 {
+                    newState->isBoardEmpty = 0;
                     (*newState).noOfTiles[firstIndex][secondIndex] = 1;
                 }
             }
@@ -113,7 +112,7 @@ GameState* initialize_game_state(const char *filename) {
         fseek(game, ftell(game), SEEK_SET);
 
         fscanf(game, "%c", &currentValue);
-        if(currentValue == '\n')
+        if (currentValue == '\n')
         {
             break;
         }
@@ -126,39 +125,39 @@ GameState* initialize_game_state(const char *filename) {
     return newState;
 }
 
-GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed) {
+GameState *place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed)
+{
     bool check = false;
     int countTiles = 0;
     check = validateInput(game, row, col, direction, tiles, num_tiles_placed);
 
-    if(check)
+    if (check)
     {
         *num_tiles_placed = countTiles;
         return game;
     }
 
-   
     const char *temp = tiles;
     int startRow = row;
     int startCol = col;
     int heightIndex = 0;
 
-    if(direction == 'H')
+    if (direction == 'H')
     {
-        while(*temp)
+        while (*temp)
         {
-            if((startCol + 1) > game->cols)
+            if ((startCol + 1) > game->cols)
             {
                 int extra = strlen(tiles) - (startCol - col);
                 game = resizeBoard(game, extra, 0);
             }
 
-            if(*temp != ' ')
+            if (*temp != ' ')
             {
                 heightIndex = 0;
-                if(game->board[startRow][startCol][heightIndex] != '.')
+                if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    while (isalpha(game->board[startRow][startCol][heightIndex]))
                     {
                         heightIndex++;
                     }
@@ -168,27 +167,27 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
                 game->noOfTiles[startRow][startCol] = heightIndex + 1;
                 countTiles++;
             }
-            
+
             startCol++;
             temp++;
         }
     }
     else
     {
-        while(*temp)
+        while (*temp)
         {
-            if((startRow + 1) > game->rows)
+            if ((startRow + 1) > game->rows)
             {
                 int extra = strlen(tiles) - (startRow - row);
                 game = resizeBoard(game, 0, extra);
             }
 
-            if(*temp != ' ')
+            if (*temp != ' ')
             {
                 heightIndex = 0;
-                if(game->board[startRow][startCol][heightIndex] != '.')
+                if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    while (isalpha(game->board[startRow][startCol][heightIndex]))
                     {
                         heightIndex++;
                     }
@@ -198,25 +197,32 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
                 game->noOfTiles[startRow][startCol] = heightIndex + 1;
                 countTiles++;
             }
-            
+
             startRow++;
             temp++;
         }
+    }
+
+    if (countTiles > 0 && game->isBoardEmpty == 1)
+    {
+        game->isBoardEmpty = 0;
     }
 
     *num_tiles_placed = countTiles;
     return game;
 }
 
-GameState* undo_place_tiles(GameState *game) {
+GameState *undo_place_tiles(GameState *game)
+{
     (void)game;
     return game;
 }
 
-void free_game_state(GameState *game) {
-    for(int i = 0; i < game->rows; i++)
+void free_game_state(GameState *game)
+{
+    for (int i = 0; i < game->rows; i++)
     {
-        for(int j = 0; j < game->cols; j++)
+        for (int j = 0; j < game->cols; j++)
         {
             free(game->board[i][j]);
         }
@@ -225,37 +231,38 @@ void free_game_state(GameState *game) {
         free(game->noOfTiles[i]);
     }
     free(game->board);
-    free(game->noOfTiles);   
-    free(game); 
+    free(game->noOfTiles);
+    free(game);
 }
 
-void save_game_state(GameState *game, const char *filename) {
+void save_game_state(GameState *game, const char *filename)
+{
     FILE *save = fopen(filename, "w");
     int heightIndex = 0;
 
-    for(int i = 0; i < game->rows; i++)
+    for (int i = 0; i < game->rows; i++)
     {
-        for(int j = 0; j < game->cols; j++)
+        for (int j = 0; j < game->cols; j++)
         {
             heightIndex = 0;
-            if(game->board[i][j][heightIndex] != '.')
+            if (game->board[i][j][heightIndex] != '.')
             {
-                while(isalpha(game->board[i][j][heightIndex]))
+                while (isalpha(game->board[i][j][heightIndex]))
                 {
                     heightIndex++;
                 }
                 heightIndex--;
             }
-            
+
             fprintf(save, "%c", game->board[i][j][heightIndex]);
         }
 
         fprintf(save, "\n");
     }
 
-    for(int i = 0; i < game->rows; i++)
+    for (int i = 0; i < game->rows; i++)
     {
-        for(int j = 0; j < game->cols; j++)
+        for (int j = 0; j < game->cols; j++)
         {
             fprintf(save, "%d", game->noOfTiles[i][j]);
         }
@@ -268,17 +275,22 @@ void save_game_state(GameState *game, const char *filename) {
 
 bool validateInput(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed)
 {
-    if(row < 0 || col < 0)
+    if (row < 0 || col < 0)
     {
         return true;
     }
 
-    if(row >= game->rows || col >= game->cols)
+    if (row >= game->rows || col >= game->cols)
     {
         return true;
     }
 
-    if(!(direction == 'H' || direction == 'V'))
+    if (!(direction == 'H' || direction == 'V'))
+    {
+        return true;
+    }
+
+    if ((game->isBoardEmpty == 1) && (strlen(tiles) < 3))
     {
         return true;
     }
@@ -288,109 +300,225 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
     int startRow = row;
     int startCol = col;
     int heightIndex = 0;
+    bool isWordAlone = true;
 
-    if(direction == 'H')
+    if (direction == 'H')
     {
-        while(*temp)
+        while (*temp)
         {
-            if((startCol + 1) > game->cols)
+            if ((startCol + 1) > game->cols)
             {
                 break;
             }
 
-            if(*temp != ' ')
+            if (*temp != ' ')
             {
                 heightIndex = 0;
-                if(game->board[startRow][startCol][heightIndex] != '.')
+                if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    while (isalpha(game->board[startRow][startCol][heightIndex]))
                     {
                         heightIndex++;
                     }
-                    
-                    if(heightIndex > 4)
+
+                    if (heightIndex > 4)
                     {
                         return true;
                     }
 
-                    if(game->board[startRow][startCol][heightIndex - 1] == *temp)
+                    if (game->board[startRow][startCol][heightIndex - 1] == *temp)
                     {
                         return true;
                     }
                 }
 
+                if (isWordAlone == true && game->isBoardEmpty == 0)
+                {
+                    if (startCol == col)
+                    {
+                        if ((startCol - 1) >= 0)
+                        {
+                            if (game->board[startRow][startCol - 1][0] != '.')
+                            {
+                                isWordAlone = false;
+                            }
+                        }
+
+                        if (strlen(tiles) == 1)
+                        {
+                            if ((startCol + 1) < game->cols)
+                            {
+                                if (game->board[startRow][startCol + 1][0] != '.')
+                                {
+                                    isWordAlone = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((startCol + 1) == (col + (int)strlen(tiles)))
+                    {
+                        if ((startCol + 1) < game->cols)
+                        {
+                            if (game->board[startRow][startCol + 1][0] != '.')
+                            {
+                                isWordAlone = false;
+                            }
+                        }
+                    }
+
+                    if ((startRow - 1) >= 0)
+                    {
+                        if (game->board[startRow - 1][startCol][0] != '.')
+                        {
+                            isWordAlone = false;
+                        }
+                    }
+
+                    if ((startRow + 1) < game->rows)
+                    {
+                        if (game->board[startRow + 1][startCol][0] != '.')
+                        {
+                            isWordAlone = false;
+                        }
+                    }
+                }
+
                 countTiles++;
             }
-            
+            else
+            {
+                isWordAlone = false;
+            }
+
             startCol++;
             temp++;
         }
     }
     else
     {
-        while(*temp)
+        while (*temp)
         {
-            if((startRow + 1) > game->rows)
+            if ((startRow + 1) > game->rows)
             {
                 break;
             }
 
-            if(*temp != ' ')
+            if (*temp != ' ')
             {
                 heightIndex = 0;
-                if(game->board[startRow][startCol][heightIndex] != '.')
+                if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    while (isalpha(game->board[startRow][startCol][heightIndex]))
                     {
                         heightIndex++;
                     }
-                    
-                    if(heightIndex > 4)
+
+                    if (heightIndex > 4)
                     {
                         return true;
                     }
 
-                    if(game->board[startRow][startCol][heightIndex - 1] == *temp)
+                    if (game->board[startRow][startCol][heightIndex - 1] == *temp)
                     {
                         return true;
                     }
                 }
 
+                if (isWordAlone == true && game->isBoardEmpty == 0)
+                {
+                    if (startRow == row)
+                    {
+                        if ((startRow - 1) >= 0)
+                        {
+                            if (game->board[startRow - 1][startCol][0] != '.')
+                            {
+                                isWordAlone = false;
+                            }
+                        }
+
+                        if (strlen(tiles) == 1)
+                        {
+                            if ((startRow + 1) < game->cols)
+                            {
+                                if (game->board[startRow + 1][startCol][0] != '.')
+                                {
+                                    isWordAlone = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((startRow + 1) == (row + (int)strlen(tiles)))
+                    {
+                        if ((startRow + 1) < game->rows)
+                        {
+                            if (game->board[startRow + 1][startCol][0] != '.')
+                            {
+                                isWordAlone = false;
+                            }
+                        }
+                    }
+
+                    if ((startCol - 1) >= 0)
+                    {
+                        if (game->board[startRow][startCol - 1][0] != '.')
+                        {
+                            isWordAlone = false;
+                        }
+                    }
+
+                    if ((startCol + 1) < game->cols)
+                    {
+                        if (game->board[startRow][startCol + 1][0] != '.')
+                        {
+                            isWordAlone = false;
+                        }
+                    }
+                }
+
                 countTiles++;
             }
-            
+            else
+            {
+                isWordAlone = false;
+            }
+
             startRow++;
             temp++;
         }
     }
-    
 
-    (void)tiles;
+    if (game->isBoardEmpty == 0 && isWordAlone == true)
+    {
+        return true;
+    }
+
     (void)num_tiles_placed;
     return false;
 }
 
-GameState* resizeBoard(GameState *game, int horizontal, int vertical)
+GameState *resizeBoard(GameState *game, int horizontal, int vertical)
 {
-    if(horizontal != 0)
+    if (horizontal != 0)
     {
-        int memory = game->rows*(game->cols + horizontal)*5 + game->rows*(game->cols + horizontal)*5*4;
+        int memory = game->rows * (game->cols + horizontal) * 5 + game->rows * (game->cols + horizontal) * 5 * 4;
         game = realloc(game, memory);
 
-        for(int i = 0; i < game->rows; i++)
+        for (int i = 0; i < game->rows; i++)
         {
             game->board[i] = realloc(game->board[i], (game->cols + horizontal) * sizeof(char *));
             game->noOfTiles[i] = realloc(game->noOfTiles[i], (game->cols + horizontal) * sizeof(int *));
 
-            for(int j = game->cols; j < game->cols + horizontal; j++)
+            for (int j = game->cols; j < game->cols + horizontal; j++)
             {
                 game->board[i][j] = calloc(5, sizeof(char) * 5);
             }
         }
 
-        for(int i = 0; i < game->rows; i++)
+        for (int i = 0; i < game->rows; i++)
         {
-            for(int j = game->cols; j < (game->cols + horizontal); j++)
+            for (int j = game->cols; j < (game->cols + horizontal); j++)
             {
                 game->board[i][j][0] = '.';
                 game->noOfTiles[i][j] = 0;
@@ -402,27 +530,27 @@ GameState* resizeBoard(GameState *game, int horizontal, int vertical)
         return game;
     }
 
-    if(vertical != 0)
+    if (vertical != 0)
     {
-        int memory = (game->rows + vertical)*(game->cols)*5 + (game->rows + vertical)*(game->cols)*5*4;
+        int memory = (game->rows + vertical) * (game->cols) * 5 + (game->rows + vertical) * (game->cols) * 5 * 4;
         game = realloc(game, memory);
 
         game->board = realloc(game->board, (game->rows + vertical) * sizeof(char **));
         game->noOfTiles = realloc(game->noOfTiles, (game->rows + vertical) * sizeof(int *));
-        for(int i = game->rows; i < (game->rows + vertical); i++)
+        for (int i = game->rows; i < (game->rows + vertical); i++)
         {
             game->board[i] = malloc((game->cols) * sizeof(char *));
             game->noOfTiles[i] = malloc((game->cols) * sizeof(int *));
 
-            for(int j = 0; j < game->cols; j++)
+            for (int j = 0; j < game->cols; j++)
             {
                 game->board[i][j] = calloc(5, sizeof(char) * 5);
             }
         }
 
-        for(int i = game->rows; i < game->rows + vertical; i++)
+        for (int i = game->rows; i < game->rows + vertical; i++)
         {
-            for(int j = 0; j < (game->cols); j++)
+            for (int j = 0; j < (game->cols); j++)
             {
                 game->board[i][j][0] = '.';
                 game->noOfTiles[i][j] = 0;
