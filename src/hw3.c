@@ -128,14 +128,16 @@ GameState* initialize_game_state(const char *filename) {
 
 GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed) {
     bool check = false;
+    int countTiles = 0;
     check = validateInput(game, row, col, direction, tiles, num_tiles_placed);
 
     if(check)
     {
+        *num_tiles_placed = countTiles;
         return game;
     }
 
-    int countTiles = 0;
+   
     const char *temp = tiles;
     int startRow = row;
     int startCol = col;
@@ -281,24 +283,77 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
         return true;
     }
 
-    // if(!isBoardEmpty)
-    // {
-    //     int length = strlen(tiles);
-    //     int count = 0;
+    int countTiles = 0;
+    const char *temp = tiles;
+    int startRow = row;
+    int startCol = col;
+    int heightIndex = 0;
 
-    //     for(int i = 0; i < length; i++)
-    //     {
-    //         if(game->board[row][col][0] == '.')
-    //         {
-    //             count++;
-    //         }
-    //     }
+    if(direction == 'H')
+    {
+        while(*temp)
+        {
+            if((startCol + 1) > game->cols)
+            {
+                break;
+            }
 
-    //     if(count == length || count == 0)
-    //     {
-    //         return true;
-    //     }
-    // }
+            if(*temp != ' ')
+            {
+                heightIndex = 0;
+                if(game->board[startRow][startCol][heightIndex] != '.')
+                {
+                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    {
+                        heightIndex++;
+                    }
+                    
+                    if(heightIndex > 4)
+                    {
+                        return true;
+                    }
+                }
+
+                countTiles++;
+            }
+            
+            startCol++;
+            temp++;
+        }
+    }
+    else
+    {
+        while(*temp)
+        {
+            if((startRow + 1) > game->rows)
+            {
+                break;
+            }
+
+            if(*temp != ' ')
+            {
+                heightIndex = 0;
+                if(game->board[startRow][startCol][heightIndex] != '.')
+                {
+                    while(isalpha(game->board[startRow][startCol][heightIndex]))
+                    {
+                        heightIndex++;
+                    }
+                    
+                    if(heightIndex > 4)
+                    {
+                        return true;
+                    }
+                }
+
+                countTiles++;
+            }
+            
+            startRow++;
+            temp++;
+        }
+    }
+    
 
     (void)tiles;
     (void)num_tiles_placed;
