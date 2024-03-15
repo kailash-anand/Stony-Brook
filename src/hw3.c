@@ -389,6 +389,10 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
             else
             {
                 isWordAlone = false;
+                if(game->board[startRow][startCol][0] == '.')
+                {
+                    return true;
+                }
             }
 
             startCol++;
@@ -482,6 +486,10 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
             else
             {
                 isWordAlone = false;
+                if(game->board[startRow][startCol][0] == '.')
+                {
+                    return true;
+                }
             }
 
             startRow++;
