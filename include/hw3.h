@@ -1,7 +1,19 @@
 #include <stdlib.h>
 
+typedef struct States
+{
+    int startRow;
+    int startCol;
+    int resizeDist;
+    char resizeDirection;
+    const char *text;
+} States;
+
 typedef struct GameState
 {
+    States *allStates;
+    int allStatesIndex;
+    char **dictionary;
     int isBoardEmpty;
     int rows, cols;
     int **noOfTiles;
