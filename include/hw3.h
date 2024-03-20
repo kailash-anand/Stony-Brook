@@ -13,7 +13,6 @@ typedef struct GameState
 {
     States *allStates;
     int allStatesIndex;
-    char **dictionary;
     int isBoardEmpty;
     int rows, cols;
     int **noOfTiles;

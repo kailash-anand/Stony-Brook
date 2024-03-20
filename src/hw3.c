@@ -14,9 +14,11 @@
 
 void saveCurrentState(GameState *game, int row, int col, char direction, const char *tiles, int resizeDist);
 
-void loadDictionary(GameState *game);
+bool checkDictionary(char *word, int wordLength);
 
 bool validateInput(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed);
+
+bool checkWordLegality(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed);
 
 GameState *resizeBoard(GameState *game, int horizontal, int vertical);
 
@@ -126,7 +128,6 @@ GameState *initialize_game_state(const char *filename)
 
     fclose(game);
 
-    // loadDictionary(newState);
     newState->allStatesIndex = -1;
 
     return newState;
@@ -351,7 +352,7 @@ GameState *undo_place_tiles(GameState *game)
         }
     }
 
-    if(game->allStatesIndex == 0)
+    if (game->allStatesIndex == 0)
     {
         game->isBoardEmpty = 1;
     }
@@ -458,14 +459,18 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
     {
         while (*temp)
         {
+            /* Check if board size is not violated */
             if ((startCol + 1) > game->cols)
             {
                 break;
             }
 
+            /* Checks if the current pos is a letter or an empty space */
             if (*temp != ' ')
             {
                 heightIndex = 0;
+
+                /* Checks if the height of the stack is not violated and also if two same letters are stacked */
                 if (game->board[startRow][startCol][heightIndex] != '.')
                 {
                     while (isalpha(game->board[startRow][startCol][heightIndex]))
@@ -484,8 +489,10 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                     }
                 }
 
+                /* Checks if the word placed on the board (non-empty) is isolated or not */
                 if (isWordAlone == true && game->isBoardEmpty == 0)
                 {
+                    /* Checks left for first letter */
                     if (startCol == col)
                     {
                         if ((startCol - 1) >= 0)
@@ -496,6 +503,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                             }
                         }
 
+                        /* Case for a single letter */
                         if (strlen(tiles) == 1)
                         {
                             if ((startCol + 1) < game->cols)
@@ -508,6 +516,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                         }
                     }
 
+                    /* Checks right for last letter */
                     if ((startCol + 1) == (col + (int)strlen(tiles)))
                     {
                         if ((startCol + 1) < game->cols)
@@ -519,6 +528,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                         }
                     }
 
+                    /* Checks bottom for the letter */
                     if ((startRow - 1) >= 0)
                     {
                         if (game->board[startRow - 1][startCol][0] != '.')
@@ -527,6 +537,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                         }
                     }
 
+                    /* Checks top for the letter */
                     if ((startRow + 1) < game->rows)
                     {
                         if (game->board[startRow + 1][startCol][0] != '.')
@@ -540,8 +551,8 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
             }
             else
             {
-                isWordAlone = false;
-                if (game->board[startRow][startCol][0] == '.')
+                isWordAlone = false;                           // If empty space then word is not isolated
+                if (game->board[startRow][startCol][0] == '.') // Checks if emptys space actually has a letter in the board
                 {
                     return true;
                 }
@@ -555,14 +566,18 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
     {
         while (*temp)
         {
+            /* Check if board size is not violated */
             if ((startRow + 1) > game->rows)
             {
                 break;
             }
 
+            /* Checks if the current pos is a letter or an empty space */
             if (*temp != ' ')
             {
                 heightIndex = 0;
+
+                /* Checks if the height of the stack is not violated and also if two same letters are stacked */
                 if (game->board[startRow][startCol][heightIndex] != '.')
                 {
                     while (isalpha(game->board[startRow][startCol][heightIndex]))
@@ -581,8 +596,10 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                     }
                 }
 
+                /* Checks if the word placed on the board (non-empty) is isolated or not */
                 if (isWordAlone == true && game->isBoardEmpty == 0)
                 {
+                    /* Checks left for first letter */
                     if (startRow == row)
                     {
                         if ((startRow - 1) >= 0)
@@ -593,6 +610,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                             }
                         }
 
+                        /* Case for a single letter */
                         if (strlen(tiles) == 1)
                         {
                             if ((startRow + 1) < game->cols)
@@ -605,6 +623,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                         }
                     }
 
+                    /* Checks right for last letter */
                     if ((startRow + 1) == (row + (int)strlen(tiles)))
                     {
                         if ((startRow + 1) < game->rows)
@@ -616,6 +635,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                         }
                     }
 
+                    /* Checks bottom for the letter */
                     if ((startCol - 1) >= 0)
                     {
                         if (game->board[startRow][startCol - 1][0] != '.')
@@ -624,6 +644,7 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                         }
                     }
 
+                    /* Checks top for the letter */
                     if ((startCol + 1) < game->cols)
                     {
                         if (game->board[startRow][startCol + 1][0] != '.')
@@ -637,8 +658,8 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
             }
             else
             {
-                isWordAlone = false;
-                if (game->board[startRow][startCol][0] == '.')
+                isWordAlone = false;                           // If empty space then word is not isolated
+                if (game->board[startRow][startCol][0] == '.') // Checks if emptys space actually has a letter in the board
                 {
                     return true;
                 }
@@ -649,10 +670,17 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
         }
     }
 
+    /* Finally checks if the the word placed is not surronded when the board is not empty */
     if (game->isBoardEmpty == 0 && isWordAlone == true)
     {
         return true;
     }
+
+    /* Check if the words formed and the one added are legal */
+    // if (!checkWordLegality(game, row, col, direction, tiles, num_tiles_placed))
+    // {
+    //     return true;
+    // }
 
     (void)num_tiles_placed;
     return false;
@@ -725,27 +753,32 @@ GameState *resizeBoard(GameState *game, int horizontal, int vertical)
     return game;
 }
 
-void loadDictionary(GameState *game)
+bool checkDictionary(char *word, int wordLength)
 {
+
+    if (word == NULL)
+    {
+        return true;
+    }
+
     FILE *words = fopen("./tests/words.txt", "r");
     const int SIZE = 235885;
-    char currentWord[50];
-    int index = -1;
-
-    game->dictionary = malloc(SIZE * sizeof(char));
+    char currentWord[100] = {0};
 
     for (int i = 0; i < SIZE; i++)
     {
-        index = -1;
-        while (currentWord[index])
-        {
-            index++;
-            fscanf(words, "%c", &currentWord[index]);
-        }
+        fscanf(words, "%s", currentWord);
 
-        game->dictionary[i] = malloc((index + 2));
-        strncpy(game->dictionary[i], currentWord, (index + 2));
+        if (strncmp(word, currentWord, wordLength) == 0)
+        {
+            fclose(words);
+            return true;
+        }
     }
+
+    fclose(words);
+
+    return false;
 }
 
 void saveCurrentState(GameState *game, int row, int col, char direction, const char *tiles, int resizeDist)
@@ -767,4 +800,61 @@ void saveCurrentState(GameState *game, int row, int col, char direction, const c
     game->allStates[game->allStatesIndex].resizeDirection = direction;
 
     game->allStatesIndex++;
+}
+
+bool checkWordLegality(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed)
+{
+    const char *temp = tiles;
+    int startRow = row;
+    int startCol = col;
+    char wordAdded[strlen(tiles) + 1];
+    int index = 0;
+
+    if (direction == 'H')
+    {
+        while (*temp)
+        {
+
+            if (*temp != ' ')
+            {
+                wordAdded[index] = *temp;
+            }
+            else
+            {
+                wordAdded[index] = game->board[startRow][startCol][game->noOfTiles[startRow][startCol] - 1];
+            }
+
+            index++;
+            startCol++;
+            temp++;
+        }
+    }
+    else
+    {
+        while (*temp)
+        {
+
+            if (*temp != ' ')
+            {
+                wordAdded[index] = *temp;
+            }
+            else
+            {
+                if ((startRow + 1) > game->rows)
+                {
+                    break;
+                }
+                wordAdded[index] = game->board[startRow][startCol][game->noOfTiles[startRow][startCol] - 1];
+            }
+
+            index++;
+            startRow++;
+            temp++;
+        }
+    }
+
+    (void)num_tiles_placed;
+    // (void)wordAdded;
+    // return false;
+    return checkDictionary(wordAdded, strlen(tiles));
 }
