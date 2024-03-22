@@ -777,7 +777,6 @@ bool checkDictionary(char *word, int wordLength)
 
         if (strncmp(uppercase(word, wordLength), uppercase(currentWord, wordLength), wordLength) == 0)
         {
-            printf("%s", currentWord);
             fclose(words);
             return true;
         }
@@ -837,6 +836,13 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
 
             while (game->board[startRow][tempStartCol][heightIndex] != '.')
             {
+                tempStartCol--;
+
+                if (tempStartCol < 0)
+                {
+                    break;
+                }
+
                 if ((game->noOfTiles[startRow][tempStartCol] - 1) >= 0)
                 {
                     heightIndex = game->noOfTiles[startRow][tempStartCol] - 1;
@@ -844,12 +850,6 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
                 else
                 {
                     heightIndex = 0;
-                }
-
-                tempStartCol--;
-                if (tempStartCol < 0)
-                {
-                    break;
                 }
             }
             tempStartCol++;
