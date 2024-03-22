@@ -777,6 +777,7 @@ bool checkDictionary(char *word, int wordLength)
 
         if (strncmp(uppercase(word, wordLength), uppercase(currentWord, wordLength), wordLength) == 0)
         {
+            printf("%s", currentWord);
             fclose(words);
             return true;
         }
@@ -816,6 +817,7 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
     char wordAdded[100] = {0};
     int index = 0;
     int heightIndex = 0;
+    int count = 0;
 
     if (direction == 'H')
     {
@@ -869,11 +871,17 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
             }
         }
 
+        /* If word is a prefix of another word or has tiles succeeding it */
+        if ((startCol + 1) == (col + (int)strlen(tiles)))
+        {
+            printf("Here");
+        }
+
         while (*temp)
         {
             if ((startCol + 1) > game->cols)
             {
-                while(*temp)
+                while (*temp)
                 {
                     wordAdded[index] = *temp;
                     index++;
@@ -953,12 +961,55 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
                     }
 
                     wordAdded[index] = game->board[tempStartRow][startCol][heightIndex];
+                    count++;
                     tempStartRow++;
                     index++;
                 }
             }
 
-            if (*temp != ' ')
+            /* If word is a prefix of another word or has tiles succeeding it */
+            if ((startRow + 1) == (row + (int)strlen(tiles)) && startRow < (game->rows - 1))
+            {
+                if (*temp != ' ')
+                {
+                    wordAdded[index] = *temp;
+                    index++;
+                }
+
+                int tempStartRow = startRow + 1;
+
+                if ((game->noOfTiles[tempStartRow][startCol] - 1) >= 0)
+                {
+                    heightIndex = game->noOfTiles[tempStartRow][startCol] - 1;
+                }
+                else
+                {
+                    heightIndex = 0;
+                }
+
+                while (game->board[tempStartRow][startCol][heightIndex] != '.')
+                {
+                    if ((game->noOfTiles[tempStartRow][startCol] - 1) >= 0)
+                    {
+                        heightIndex = game->noOfTiles[tempStartRow][startCol] - 1;
+                    }
+                    else
+                    {
+                        heightIndex = 0;
+                    }
+
+                    wordAdded[index] = game->board[tempStartRow][startCol][heightIndex];
+
+                    tempStartRow++;
+                    index++;
+                    count++;
+                    if (tempStartRow >= game->rows)
+                    {
+                        break;
+                    }
+                }
+            }
+            else if (*temp != ' ')
             {
                 wordAdded[index] = *temp;
             }
@@ -991,7 +1042,7 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
     (void)num_tiles_placed;
     // (void)wordAdded;
     // return false;
-    return checkDictionary(wordAdded, strlen(tiles));
+    return checkDictionary(wordAdded, strlen(tiles) + count);
 }
 
 char *uppercase(char *temp, int length)
