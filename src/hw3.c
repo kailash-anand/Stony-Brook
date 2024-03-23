@@ -917,6 +917,7 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
     {
         while (*temp)
         {
+            /* If word added is an extentions of another word, create new word */
             if (startRow == row && startRow > 0)
             {
                 int tempStartRow = startRow - 1;
@@ -964,6 +965,53 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
                     count++;
                     tempStartRow++;
                     index++;
+                }
+            }
+
+            /* Checking contact to the right */
+            if (startRow > 0 && startRow < game->rows)
+            {
+                if (game->isBoardEmpty == 0 && (startCol + 1) < game->cols)
+                {
+                    if (*temp != ' ' && isalpha(game->board[startRow][startCol + 1][0]))
+                    {
+                        char intersectingWord[100];
+                        int intersectingIndex = 0;
+                        int tempCol = startCol;
+
+                        tempCol--;
+                        while (tempCol > 0 && game->board[startRow][tempCol][0] != '.')
+                        {
+                            tempCol--;
+                        }
+                        tempCol++;
+
+                        if (tempCol == startCol)
+                        {
+                            intersectingWord[intersectingIndex] = *temp;
+                            intersectingIndex++;
+                            tempCol++;
+                        }
+
+                        while (tempCol < game->cols && game->board[startRow][tempCol][0] != '.')
+                        {
+                            if (tempCol == startCol)
+                            {
+                                intersectingWord[intersectingIndex] = *temp;
+                                intersectingIndex++;
+                            }
+
+                            intersectingWord[intersectingIndex] = game->board[startRow][tempCol][game->noOfTiles[startRow][tempCol] - 1];
+                            intersectingIndex++;
+                            tempCol++;
+                        }
+
+                        intersectingWord[intersectingIndex] = '\0';
+                        if (!checkDictionary(intersectingWord, intersectingIndex - 1))
+                        {
+                            return false;
+                        }
+                    }
                 }
             }
 
