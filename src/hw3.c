@@ -169,10 +169,15 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
                 heightIndex = 0;
                 if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while (isalpha(game->board[startRow][startCol][heightIndex]))
+                    if ((game->noOfTiles[startRow][startCol] - 1) >= 0)
                     {
-                        heightIndex++;
+                        heightIndex = game->noOfTiles[startRow][startCol] - 1;
                     }
+                    else
+                    {
+                        heightIndex = 0;
+                    }
+                    heightIndex++;
                 }
 
                 game->board[startRow][startCol][heightIndex] = *temp;
@@ -200,10 +205,15 @@ GameState *place_tiles(GameState *game, int row, int col, char direction, const 
                 heightIndex = 0;
                 if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while (isalpha(game->board[startRow][startCol][heightIndex]))
+                    if ((game->noOfTiles[startRow][startCol] - 1) >= 0)
                     {
-                        heightIndex++;
+                        heightIndex = game->noOfTiles[startRow][startCol] - 1;
                     }
+                    else
+                    {
+                        heightIndex = 0;
+                    }
+                    heightIndex++;
                 }
 
                 game->board[startRow][startCol][heightIndex] = *temp;
@@ -471,17 +481,21 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                 /* Checks if the height of the stack is not violated and also if two same letters are stacked */
                 if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while (isalpha(game->board[startRow][startCol][heightIndex]))
+                    if ((game->noOfTiles[startRow][startCol] - 1) >= 0)
                     {
-                        heightIndex++;
+                        heightIndex = game->noOfTiles[startRow][startCol] - 1;
+                    }
+                    else
+                    {
+                        heightIndex = 0;
                     }
 
-                    if (heightIndex > 4)
+                    if (heightIndex >= 4)
                     {
                         return true;
                     }
 
-                    if (game->board[startRow][startCol][heightIndex - 1] == *temp)
+                    if (game->board[startRow][startCol][heightIndex] == *temp)
                     {
                         return true;
                     }
@@ -579,17 +593,21 @@ bool validateInput(GameState *game, int row, int col, char direction, const char
                 /* Checks if the height of the stack is not violated and also if two same letters are stacked */
                 if (game->board[startRow][startCol][heightIndex] != '.')
                 {
-                    while (isalpha(game->board[startRow][startCol][heightIndex]))
+                    if ((game->noOfTiles[startRow][startCol] - 1) >= 0)
                     {
-                        heightIndex++;
+                        heightIndex = game->noOfTiles[startRow][startCol] - 1;
+                    }
+                    else
+                    {
+                        heightIndex = 0;
                     }
 
-                    if (heightIndex > 4)
+                    if (heightIndex >= 4)
                     {
                         return true;
                     }
 
-                    if (game->board[startRow][startCol][heightIndex - 1] == *temp)
+                    if (game->board[startRow][startCol][heightIndex] == *temp)
                     {
                         return true;
                     }
@@ -769,7 +787,7 @@ bool checkDictionary(char *word, int wordLength)
     {
         fscanf(words, "%s", currentWord);
 
-        if (strcasecmp(word,currentWord) == 0)
+        if (strcasecmp(word, currentWord) == 0)
         {
             fclose(words);
             return true;
