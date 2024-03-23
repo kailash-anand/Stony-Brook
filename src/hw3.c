@@ -383,12 +383,6 @@ void free_game_state(GameState *game)
         free(game->allStates);
     }
 
-    // for(int i = 0; i < 235885; i++)
-    // {
-    //     free(game->dictionary[i]);
-    // }
-
-    // free(game->dictionary);
     free(game);
 }
 
@@ -775,7 +769,7 @@ bool checkDictionary(char *word, int wordLength)
     {
         fscanf(words, "%s", currentWord);
 
-        if (strncmp(uppercase(word, wordLength), uppercase(currentWord, wordLength), wordLength) == 0)
+        if (strcasecmp(word,currentWord) == 0)
         {
             fclose(words);
             return true;
@@ -783,7 +777,7 @@ bool checkDictionary(char *word, int wordLength)
     }
 
     fclose(words);
-
+    (void)wordLength;
     return false;
 }
 
@@ -868,43 +862,141 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
                 wordAdded[index] = game->board[startRow][tempStartCol][heightIndex];
                 tempStartCol++;
                 index++;
+                count++;
             }
-        }
-
-        /* If word is a prefix of another word or has tiles succeeding it */
-        if ((startCol + 1) == (col + (int)strlen(tiles)))
-        {
-            printf("Here");
         }
 
         while (*temp)
         {
-            if ((startCol + 1) > game->cols)
+
+            /* Checking contact to the top */
+            // if (startCol > 0 && startCol < game->cols)
+            // {
+            //     if (game->isBoardEmpty == 0 && (startRow + 1) < game->rows)
+            //     {
+            //         if (*temp != ' ' && isalpha(game->board[startRow + 1][startCol][0]))
+            //         {
+            //             char intersectingWord[100];
+            //             int intersectingIndex = 0;
+            //             int tempRow = startRow;
+
+            //             tempRow--;
+            //             while (tempRow > 0 && game->board[tempRow][startCol][0] != '.')
+            //             {
+            //                 tempRow--;
+            //             }
+            //             tempRow++;
+
+            //             if (tempRow == startRow)
+            //             {
+            //                 intersectingWord[intersectingIndex] = *temp;
+            //                 intersectingIndex++;
+            //                 tempRow++;
+            //             }
+
+            //             while (tempRow < game->rows && game->board[tempRow][startCol][0] != '.')
+            //             {
+            //                 if (tempRow == startRow)
+            //                 {
+            //                     intersectingWord[intersectingIndex] = *temp;
+            //                     intersectingIndex++;
+            //                 }
+
+            //                 intersectingWord[intersectingIndex] = game->board[tempRow][startCol][game->noOfTiles[tempRow][startCol] - 1];
+            //                 intersectingIndex++;
+            //                 tempRow++;
+            //             }
+
+            //             intersectingWord[intersectingIndex] = '\0';
+            //             if (!checkDictionary(intersectingWord, intersectingIndex - 1))
+            //             {
+            //                 return false;
+            //             }
+            //         }
+            //     }
+            // }
+
+            /* If word is a prefix of another word or has tiles succeeding it */
+            if ((startCol + 1) == (col + (int)strlen(tiles)) && startCol < game->cols - 1)
             {
-                while (*temp)
+                if (*temp != ' ')
                 {
                     wordAdded[index] = *temp;
                     index++;
-                    temp++;
                 }
-                break;
-            }
+                else
+                {
+                    if ((game->noOfTiles[startRow][startCol] - 1) >= 0)
+                    {
+                        heightIndex = game->noOfTiles[startRow][startCol] - 1;
+                    }
+                    else
+                    {
+                        heightIndex = 0;
+                    }
+                    wordAdded[index] = game->board[startRow][startCol][heightIndex];
+                    index++;
+                }
 
-            if ((game->noOfTiles[startRow][startCol] - 1) >= 0)
-            {
-                heightIndex = game->noOfTiles[startRow][startCol] - 1;
-            }
-            else
-            {
-                heightIndex = 0;
-            }
+                int tempStartCol = startCol + 1;
 
-            if (*temp != ' ')
+                if ((game->noOfTiles[startRow][tempStartCol] - 1) >= 0)
+                {
+                    heightIndex = game->noOfTiles[startRow][tempStartCol] - 1;
+                }
+                else
+                {
+                    heightIndex = 0;
+                }
+
+                while (game->board[startRow][tempStartCol][heightIndex] != '.')
+                {
+                    if ((game->noOfTiles[startRow][tempStartCol] - 1) >= 0)
+                    {
+                        heightIndex = game->noOfTiles[startRow][tempStartCol] - 1;
+                    }
+                    else
+                    {
+                        heightIndex = 0;
+                    }
+
+                    wordAdded[index] = game->board[startRow][tempStartCol][heightIndex];
+
+                    tempStartCol++;
+                    index++;
+                    count++;
+                    if (tempStartCol >= game->cols)
+                    {
+                        break;
+                    }
+                }
+            }
+            else if (*temp != ' ')
             {
                 wordAdded[index] = *temp;
             }
             else
             {
+                if ((startCol + 1) > game->cols)
+                {
+                    while (*temp)
+                    {
+                        wordAdded[index] = *temp;
+                        index++;
+                        temp++;
+                    }
+                    break;
+                }
+
+                if ((game->noOfTiles[startRow][startCol] - 1) >= 0)
+                {
+                    heightIndex = game->noOfTiles[startRow][startCol] - 1;
+                }
+                else
+                {
+                    heightIndex = 0;
+                }
+
                 wordAdded[index] = game->board[startRow][startCol][heightIndex];
             }
 
@@ -915,13 +1007,23 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
     }
     else
     {
-        while (*temp)
-        {
-            /* If word added is an extentions of another word, create new word */
-            if (startRow == row && startRow > 0)
-            {
-                int tempStartRow = startRow - 1;
 
+        /* If word added is an extentions of another word, create new word */
+        if (startRow == row && startRow > 0)
+        {
+            int tempStartRow = startRow - 1;
+
+            if ((game->noOfTiles[tempStartRow][startCol] - 1) >= 0)
+            {
+                heightIndex = game->noOfTiles[tempStartRow][startCol] - 1;
+            }
+            else
+            {
+                heightIndex = 0;
+            }
+
+            while (game->board[tempStartRow][startCol][heightIndex] != '.')
+            {
                 if ((game->noOfTiles[tempStartRow][startCol] - 1) >= 0)
                 {
                     heightIndex = game->noOfTiles[tempStartRow][startCol] - 1;
@@ -931,43 +1033,34 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
                     heightIndex = 0;
                 }
 
-                while (game->board[tempStartRow][startCol][heightIndex] != '.')
+                tempStartRow--;
+                if (tempStartRow < 0)
                 {
-                    if ((game->noOfTiles[tempStartRow][startCol] - 1) >= 0)
-                    {
-                        heightIndex = game->noOfTiles[tempStartRow][startCol] - 1;
-                    }
-                    else
-                    {
-                        heightIndex = 0;
-                    }
-
-                    tempStartRow--;
-                    if (tempStartRow < 0)
-                    {
-                        break;
-                    }
-                }
-                tempStartRow++;
-
-                while (tempStartRow != startRow)
-                {
-                    if ((game->noOfTiles[tempStartRow][startCol] - 1) >= 0)
-                    {
-                        heightIndex = game->noOfTiles[tempStartRow][startCol] - 1;
-                    }
-                    else
-                    {
-                        heightIndex = 0;
-                    }
-
-                    wordAdded[index] = game->board[tempStartRow][startCol][heightIndex];
-                    count++;
-                    tempStartRow++;
-                    index++;
+                    break;
                 }
             }
+            tempStartRow++;
 
+            while (tempStartRow != startRow)
+            {
+                if ((game->noOfTiles[tempStartRow][startCol] - 1) >= 0)
+                {
+                    heightIndex = game->noOfTiles[tempStartRow][startCol] - 1;
+                }
+                else
+                {
+                    heightIndex = 0;
+                }
+
+                wordAdded[index] = game->board[tempStartRow][startCol][heightIndex];
+                count++;
+                tempStartRow++;
+                index++;
+            }
+        }
+
+        while (*temp)
+        {
             /* Checking contact to the right */
             if (startRow > 0 && startRow < game->rows)
             {
