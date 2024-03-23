@@ -868,53 +868,62 @@ bool checkWordLegality(GameState *game, int row, int col, char direction, const 
 
         while (*temp)
         {
-
             /* Checking contact to the top */
-            // if (startCol > 0 && startCol < game->cols)
-            // {
-            //     if (game->isBoardEmpty == 0 && (startRow + 1) < game->rows)
-            //     {
-            //         if (*temp != ' ' && isalpha(game->board[startRow + 1][startCol][0]))
-            //         {
-            //             char intersectingWord[100];
-            //             int intersectingIndex = 0;
-            //             int tempRow = startRow;
+            if (startCol > 0 && startCol < game->cols)
+            {
+                if (game->isBoardEmpty == 0 && (startRow - 1) >= 0)
+                {
+                    if (*temp != ' ' && isalpha(game->board[startRow - 1][startCol][0]))
+                    {
+                        char intersectingWord[100];
+                        int intersectingIndex = 0;
+                        int tempRow = startRow;
 
-            //             tempRow--;
-            //             while (tempRow > 0 && game->board[tempRow][startCol][0] != '.')
-            //             {
-            //                 tempRow--;
-            //             }
-            //             tempRow++;
+                        tempRow--;
+                        while (tempRow > 0 && game->board[tempRow][startCol][0] != '.')
+                        {
+                            tempRow--;
+                        }
+                        tempRow++;
 
-            //             if (tempRow == startRow)
-            //             {
-            //                 intersectingWord[intersectingIndex] = *temp;
-            //                 intersectingIndex++;
-            //                 tempRow++;
-            //             }
+                        if (tempRow == startRow)
+                        {
+                            intersectingWord[intersectingIndex] = *temp;
+                            intersectingIndex++;
+                            tempRow++;
+                        }
 
-            //             while (tempRow < game->rows && game->board[tempRow][startCol][0] != '.')
-            //             {
-            //                 if (tempRow == startRow)
-            //                 {
-            //                     intersectingWord[intersectingIndex] = *temp;
-            //                     intersectingIndex++;
-            //                 }
+                        while (tempRow < game->rows && game->board[tempRow][startCol][0] != '.')
+                        {
+                            if (tempRow == startRow)
+                            {
+                                intersectingWord[intersectingIndex] = *temp;
+                                intersectingIndex++;
+                                tempRow++;
+                            }
+                            else
+                            {
+                                intersectingWord[intersectingIndex] = game->board[tempRow][startCol][game->noOfTiles[tempRow][startCol] - 1];
+                                intersectingIndex++;
+                                tempRow++;
+                            }
+                        }
 
-            //                 intersectingWord[intersectingIndex] = game->board[tempRow][startCol][game->noOfTiles[tempRow][startCol] - 1];
-            //                 intersectingIndex++;
-            //                 tempRow++;
-            //             }
+                        if (tempRow == startRow)
+                        {
+                            intersectingWord[intersectingIndex] = *temp;
+                            intersectingIndex++;
+                            tempRow++;
+                        }
 
-            //             intersectingWord[intersectingIndex] = '\0';
-            //             if (!checkDictionary(intersectingWord, intersectingIndex - 1))
-            //             {
-            //                 return false;
-            //             }
-            //         }
-            //     }
-            // }
+                        intersectingWord[intersectingIndex] = '\0';
+                        if (!checkDictionary(intersectingWord, intersectingIndex - 1))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
 
             /* If word is a prefix of another word or has tiles succeeding it */
             if ((startCol + 1) == (col + (int)strlen(tiles)) && startCol < game->cols - 1)
