@@ -286,7 +286,7 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
             break;
 
         case 'N':
-            return is_valid_king_move(src_row, src_col, dest_row, dest_col);
+            return is_valid_knight_move(src_row, src_col, dest_row, dest_col);
             break;
 
         case 'B':
