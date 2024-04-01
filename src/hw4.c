@@ -9,6 +9,10 @@ bool isOutOfBounds(int row, int col);
 
 int countSquares(int src_row, int src_col, int dest_row, int dest_col);
 
+bool isInvalidLetterIndex(char letter);
+
+bool isValidPromotionPiece(char piece);
+
 void initialize_game(ChessGame *game) 
 {
     const int BOARD_DIMENTIONS = 8; // The board is and 8x8 board.
@@ -314,10 +318,53 @@ void fen_to_chessboard(const char *fen, ChessGame *game) {
     (void)game;
 }
 
-int parse_move(const char *move, ChessMove *parsed_move) {
-    (void)move;
-    (void)parsed_move;
-    return -999;
+int parse_move(const char *move, ChessMove *parsed_move) 
+{
+    int length = strlen(move);
+    if(!(length == 4 || length == 5))
+    {
+        return PARSE_MOVE_INVALID_FORMAT;
+    }
+
+    if((isInvalidLetterIndex(move[0]) && isInvalidLetterIndex(move[2])))
+    {
+        return PARSE_MOVE_INVALID_FORMAT;
+    }
+
+    if(isOutOfBounds(((move[1] - 1) - '0'), ((move[3] - 1) - '0')))
+    {
+        return PARSE_MOVE_OUT_OF_BOUNDS;
+    }
+
+    if(length == 5)
+    {
+        int destination = move[3] - '0';
+        if(!((destination == 8) || (destination == 1)))
+        {
+            return PARSE_MOVE_INVALID_DESTINATION;
+        }
+
+        if(!isValidPromotionPiece(move[4]))
+        {
+            return PARSE_MOVE_INVALID_PROMOTION;
+        }
+    }
+
+    parsed_move->startSquare[0] = move[0];
+    parsed_move->startSquare[1] = move[1];
+    parsed_move->startSquare[2] = '\0';
+
+    parsed_move->endSquare[0] = move[2];
+    parsed_move->endSquare[1] = move[3];
+    parsed_move->endSquare[2] = '\0';
+
+    if(length == 5)
+    {
+        parsed_move->endSquare[2] = move[4];
+        parsed_move->endSquare[3] = '\0';
+    }
+
+    return 0;
 }
 
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
@@ -373,7 +420,6 @@ void display_chessboard(ChessGame *game)
     printf("  a b c d e f g h\n");
 }
 
-/* Method checks if between two points, does any piece exist. Also consideres diagonal movement */
 bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game)
 {
     int differenceRow =  abs(dest_row - src_row);
@@ -534,4 +580,34 @@ int countSquares(int src_row, int src_col, int dest_row, int dest_col)
     }
 
     return -1;
+}
+
+bool isInvalidLetterIndex(char letter)
+{
+    switch(letter)
+    {
+        case 'a': return false;
+        case 'b': return false;
+        case 'c': return false;
+        case 'd': return false;
+        case 'e': return false;
+        case 'f': return false;
+        case 'g': return false;
+        case 'h': return false;
+    }
+
+    return true;
+}
+
+bool isValidPromotionPiece(char piece)
+{
+    switch(piece)
+    {
+        case 'n': return true;
+        case 'q': return true;
+        case 'b': return true;
+        case 'r': return true;
+    }
+
+    return false;
 }
