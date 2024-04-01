@@ -1,7 +1,91 @@
 #include "hw4.h"
 
 void initialize_game(ChessGame *game) {
-    (void)game;
+    const int BOARD_DIMENTIONS = 8; // The board is and 8x8 board.
+
+    game->moveCount = 0;
+    game->capturedCount = 0;
+    game->currentPlayer = WHITE_PLAYER;
+
+    for(int i = 0; i < BOARD_DIMENTIONS; i++)
+    {
+        for(int j = 0; j < BOARD_DIMENTIONS; j++)
+        {
+            switch(i)
+            {
+                case 0:
+                    switch(j)
+                    {
+                        case 0:
+                            game->chessboard[i][j] = 'r';
+                            break; 
+                        case 1:
+                            game->chessboard[i][j] = 'n';
+                            break;
+                        case 2:
+                            game->chessboard[i][j] = 'b';
+                            break;
+                        case 3:
+                            game->chessboard[i][j] = 'q';
+                            break;
+                        case 4:
+                            game->chessboard[i][j] = 'k';
+                            break;
+                        case 5:
+                            game->chessboard[i][j] = 'b';
+                            break;
+                        case 6:
+                            game->chessboard[i][j] = 'n';
+                            break;
+                        case 7:
+                            game->chessboard[i][j] = 'r';
+                            break;
+                    }
+                    break;
+
+                case 1: 
+                    game->chessboard[i][j] = 'p';
+                    break;
+
+                case 6:
+                    game->chessboard[i][j] = 'P';
+                    break;
+
+                case 7:
+                    switch(j)
+                    {
+                        case 0:
+                            game->chessboard[i][j] = 'R';
+                            break; 
+                        case 1:
+                            game->chessboard[i][j] = 'N';
+                            break;
+                        case 2:
+                            game->chessboard[i][j] = 'B';
+                            break;
+                        case 3:
+                            game->chessboard[i][j] = 'Q';
+                            break;
+                        case 4:
+                            game->chessboard[i][j] = 'K';
+                            break;
+                        case 5:
+                            game->chessboard[i][j] = 'B';
+                            break;
+                        case 6:
+                            game->chessboard[i][j] = 'N';
+                            break;
+                        case 7:
+                            game->chessboard[i][j] = 'R';
+                            break;
+                    }
+                    break;
+
+                default:
+                    game->chessboard[i][j] = '.';
+            }
+        }
+    }
 }
 
 void chessboard_to_fen(char fen[], ChessGame *game) {
