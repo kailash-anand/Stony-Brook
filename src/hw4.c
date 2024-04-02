@@ -15,7 +15,7 @@ bool isValidPromotionPiece(char piece);
 
 int convertMoveToCoordinates(char row);
 
-void initialize_game(ChessGame *game) 
+void initialize_game(ChessGame *game)
 {
     const int BOARD_DIMENTIONS = 8; // The board is and 8x8 board.
 
@@ -23,111 +23,111 @@ void initialize_game(ChessGame *game)
     game->capturedCount = 0;
     game->currentPlayer = WHITE_PLAYER;
 
-    for(int i = 0; i < BOARD_DIMENTIONS; i++)
+    for (int i = 0; i < BOARD_DIMENTIONS; i++)
     {
-        for(int j = 0; j < BOARD_DIMENTIONS; j++)
+        for (int j = 0; j < BOARD_DIMENTIONS; j++)
         {
-            switch(i)
+            switch (i)
             {
+            case 0:
+                switch (j)
+                {
                 case 0:
-                    switch(j)
-                    {
-                        case 0:
-                            game->chessboard[i][j] = 'r';
-                            break; 
-                        case 1:
-                            game->chessboard[i][j] = 'n';
-                            break;
-                        case 2:
-                            game->chessboard[i][j] = 'b';
-                            break;
-                        case 3:
-                            game->chessboard[i][j] = 'q';
-                            break;
-                        case 4:
-                            game->chessboard[i][j] = 'k';
-                            break;
-                        case 5:
-                            game->chessboard[i][j] = 'b';
-                            break;
-                        case 6:
-                            game->chessboard[i][j] = 'n';
-                            break;
-                        case 7:
-                            game->chessboard[i][j] = 'r';
-                            break;
-                    }
+                    game->chessboard[i][j] = 'r';
                     break;
-
-                case 1: 
-                    game->chessboard[i][j] = 'p';
+                case 1:
+                    game->chessboard[i][j] = 'n';
                     break;
-
+                case 2:
+                    game->chessboard[i][j] = 'b';
+                    break;
+                case 3:
+                    game->chessboard[i][j] = 'q';
+                    break;
+                case 4:
+                    game->chessboard[i][j] = 'k';
+                    break;
+                case 5:
+                    game->chessboard[i][j] = 'b';
+                    break;
                 case 6:
-                    game->chessboard[i][j] = 'P';
+                    game->chessboard[i][j] = 'n';
                     break;
-
                 case 7:
-                    switch(j)
-                    {
-                        case 0:
-                            game->chessboard[i][j] = 'R';
-                            break; 
-                        case 1:
-                            game->chessboard[i][j] = 'N';
-                            break;
-                        case 2:
-                            game->chessboard[i][j] = 'B';
-                            break;
-                        case 3:
-                            game->chessboard[i][j] = 'Q';
-                            break;
-                        case 4:
-                            game->chessboard[i][j] = 'K';
-                            break;
-                        case 5:
-                            game->chessboard[i][j] = 'B';
-                            break;
-                        case 6:
-                            game->chessboard[i][j] = 'N';
-                            break;
-                        case 7:
-                            game->chessboard[i][j] = 'R';
-                            break;
-                    }
+                    game->chessboard[i][j] = 'r';
                     break;
+                }
+                break;
 
-                default:
-                    game->chessboard[i][j] = '.';
+            case 1:
+                game->chessboard[i][j] = 'p';
+                break;
+
+            case 6:
+                game->chessboard[i][j] = 'P';
+                break;
+
+            case 7:
+                switch (j)
+                {
+                case 0:
+                    game->chessboard[i][j] = 'R';
+                    break;
+                case 1:
+                    game->chessboard[i][j] = 'N';
+                    break;
+                case 2:
+                    game->chessboard[i][j] = 'B';
+                    break;
+                case 3:
+                    game->chessboard[i][j] = 'Q';
+                    break;
+                case 4:
+                    game->chessboard[i][j] = 'K';
+                    break;
+                case 5:
+                    game->chessboard[i][j] = 'B';
+                    break;
+                case 6:
+                    game->chessboard[i][j] = 'N';
+                    break;
+                case 7:
+                    game->chessboard[i][j] = 'R';
+                    break;
+                }
+                break;
+
+            default:
+                game->chessboard[i][j] = '.';
             }
         }
     }
 }
 
-void chessboard_to_fen(char fen[], ChessGame *game) 
+void chessboard_to_fen(char fen[], ChessGame *game)
 {
     const int BOARD_DIMENTIONS = 8;
     int count = 0;
     char *tempFen = fen;
 
-    for(int i = 0; i < BOARD_DIMENTIONS; i++)
+    for (int i = 0; i < BOARD_DIMENTIONS; i++)
     {
-        for(int j = 0; j < BOARD_DIMENTIONS; j++)
+        for (int j = 0; j < BOARD_DIMENTIONS; j++)
         {
-            if(hasPiece(i, j, game))
+            if (hasPiece(i, j, game))
             {
                 *tempFen = game->chessboard[i][j];
                 tempFen++;
             }
             else
             {
-                while(!hasPiece(i, j, game) && (j < BOARD_DIMENTIONS))
+                while (!hasPiece(i, j, game) && (j < BOARD_DIMENTIONS))
                 {
                     count++;
                     j++;
                 }
                 j--;
-                
+
                 *tempFen = count + '0';
                 tempFen++;
                 count = 0;
@@ -142,7 +142,7 @@ void chessboard_to_fen(char fen[], ChessGame *game)
     *tempFen = ' ';
     tempFen++;
 
-    if(game->currentPlayer == BLACK_PLAYER)
+    if (game->currentPlayer == BLACK_PLAYER)
     {
         *tempFen = 'b';
     }
@@ -155,28 +155,28 @@ void chessboard_to_fen(char fen[], ChessGame *game)
     *tempFen = '\0';
 }
 
-bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) 
+bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game)
 {
-    if(dest_row == src_row)
+    if (dest_row == src_row)
     {
         return false;
     }
 
     int count = 0;
 
-    if(piece == 'p')
+    if (piece == 'p')
     {
-        if(dest_row < src_row)
+        if (dest_row < src_row)
         {
             return false;
         }
 
         count = countSquares(src_row, src_col, dest_row, dest_col);
-        if(((count == 1) || (count == 2)))
+        if (((count == 1) || (count == 2)))
         {
-            if((count == 1) && abs(dest_col - src_col) == 1)
+            if ((count == 1) && abs(dest_col - src_col) == 1)
             {
-                if(hasPiece(dest_row, dest_col, game))
+                if (hasPiece(dest_row, dest_col, game))
                 {
                     return true;
                 }
@@ -185,16 +185,16 @@ bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int 
                     return false;
                 }
             }
-            else if((count == 1) && (dest_col == src_col))
+            else if ((count == 1) && (dest_col == src_col))
             {
-                if(hasPiece(dest_row, dest_col, game))
+                if (hasPiece(dest_row, dest_col, game))
                 {
                     return false;
                 }
             }
-            else if((count == 2) && (dest_col == src_col))
+            else if ((count == 2) && (dest_col == src_col))
             {
-                if(hasPiece(dest_row, dest_col, game) || hasPiece((dest_row - 1) ,dest_col, game))
+                if (hasPiece(dest_row, dest_col, game) || hasPiece((dest_row - 1), dest_col, game))
                 {
                     return false;
                 }
@@ -204,19 +204,19 @@ bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int 
         }
     }
 
-    if(piece == 'P')
+    if (piece == 'P')
     {
-        if(dest_row > src_row)
+        if (dest_row > src_row)
         {
             return false;
         }
 
         count = countSquares(src_row, src_col, dest_row, dest_col);
-        if(((count == 1) || (count == 2)))
+        if (((count == 1) || (count == 2)))
         {
-            if((count == 1) && abs(dest_col - src_col) == 1)
+            if ((count == 1) && abs(dest_col - src_col) == 1)
             {
-                if(hasPiece(dest_row, dest_col, game))
+                if (hasPiece(dest_row, dest_col, game))
                 {
                     return true;
                 }
@@ -225,16 +225,16 @@ bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int 
                     return false;
                 }
             }
-            else if((count == 1) && (dest_col == src_col))
+            else if ((count == 1) && (dest_col == src_col))
             {
-                if(hasPiece(dest_row, dest_col, game))
+                if (hasPiece(dest_row, dest_col, game))
                 {
                     return false;
                 }
             }
-            else if((count == 2) && (dest_col == src_col))
+            else if ((count == 2) && (dest_col == src_col))
             {
-                if(hasPiece(dest_row, dest_col, game) || hasPiece((dest_row + 1) ,dest_col, game))
+                if (hasPiece(dest_row, dest_col, game) || hasPiece((dest_row + 1), dest_col, game))
                 {
                     return false;
                 }
@@ -247,12 +247,12 @@ bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int 
     return false;
 }
 
-bool is_valid_rook_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) 
+bool is_valid_rook_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game)
 {
-    //Check if horizontal or vertical direction treversed
-    if((src_row == dest_row) || (src_col == dest_col))
+    // Check if horizontal or vertical direction treversed
+    if ((src_row == dest_row) || (src_col == dest_col))
     {
-        if(isBlocked(src_row, src_col, dest_row, dest_col, game))
+        if (isBlocked(src_row, src_col, dest_row, dest_col, game))
         {
             return false;
         }
@@ -263,19 +263,19 @@ bool is_valid_rook_move(int src_row, int src_col, int dest_row, int dest_col, Ch
     return false;
 }
 
-bool is_valid_knight_move(int src_row, int src_col, int dest_row, int dest_col) 
+bool is_valid_knight_move(int src_row, int src_col, int dest_row, int dest_col)
 {
-    if(abs(dest_row - src_row) == 2)
+    if (abs(dest_row - src_row) == 2)
     {
-        if(abs(dest_col - src_col) == 1)
+        if (abs(dest_col - src_col) == 1)
         {
             return true;
         }
     }
 
-    if(abs(dest_row - src_row) == 1)
+    if (abs(dest_row - src_row) == 1)
     {
-        if(abs(dest_col - src_col) == 2)
+        if (abs(dest_col - src_col) == 2)
         {
             return true;
         }
@@ -284,14 +284,14 @@ bool is_valid_knight_move(int src_row, int src_col, int dest_row, int dest_col)
     return false;
 }
 
-bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) 
+bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game)
 {
-    if(abs(dest_row - src_row) != abs(dest_col - src_col))
+    if (abs(dest_row - src_row) != abs(dest_col - src_col))
     {
         return false;
     }
 
-    if(isBlocked(src_row, src_col, dest_row, dest_col, game))
+    if (isBlocked(src_row, src_col, dest_row, dest_col, game))
     {
         return false;
     }
@@ -299,24 +299,14 @@ bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, 
     return true;
 }
 
-bool is_valid_queen_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) 
+bool is_valid_queen_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game)
 {
-    if(is_valid_rook_move(src_row, src_col, dest_row, dest_col, game))
+    if (is_valid_rook_move(src_row, src_col, dest_row, dest_col, game))
     {
         return true;
     }
 
-    if(is_valid_bishop_move(src_row, src_col, dest_row, dest_col, game))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool is_valid_king_move(int src_row, int src_col, int dest_row, int dest_col) 
-{
-    if(countSquares(src_row, src_col, dest_row, dest_col) == 1)
+    if (is_valid_bishop_move(src_row, src_col, dest_row, dest_col, game))
     {
         return true;
     }
@@ -324,58 +314,68 @@ bool is_valid_king_move(int src_row, int src_col, int dest_row, int dest_col)
     return false;
 }
 
-bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) 
+bool is_valid_king_move(int src_row, int src_col, int dest_row, int dest_col)
 {
-    if((isOutOfBounds(src_row, src_col) || isOutOfBounds(dest_row, dest_col)))
+    if (countSquares(src_row, src_col, dest_row, dest_col) == 1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game)
+{
+    if ((isOutOfBounds(src_row, src_col) || isOutOfBounds(dest_row, dest_col)))
     {
         return false;
     }
 
-    switch(toupper(piece))
+    switch (toupper(piece))
     {
-        case 'P':
-            return is_valid_pawn_move(piece, src_row, src_col, dest_row, dest_col, game);
-            break;
+    case 'P':
+        return is_valid_pawn_move(piece, src_row, src_col, dest_row, dest_col, game);
+        break;
 
-        case 'N':
-            return is_valid_knight_move(src_row, src_col, dest_row, dest_col);
-            break;
+    case 'N':
+        return is_valid_knight_move(src_row, src_col, dest_row, dest_col);
+        break;
 
-        case 'B':
-            return is_valid_bishop_move(src_row, src_col, dest_row, dest_col, game);
-            break;
+    case 'B':
+        return is_valid_bishop_move(src_row, src_col, dest_row, dest_col, game);
+        break;
 
-        case 'R':
-            return is_valid_rook_move(src_row, src_col, dest_row, dest_col, game);
-            break;
+    case 'R':
+        return is_valid_rook_move(src_row, src_col, dest_row, dest_col, game);
+        break;
 
-        case 'Q':
-            return is_valid_queen_move(src_row, src_col, dest_row, dest_col, game);
-            break;
+    case 'Q':
+        return is_valid_queen_move(src_row, src_col, dest_row, dest_col, game);
+        break;
 
-        case 'K':
-            return is_valid_king_move(src_row, src_col, dest_row, dest_col);
-            break;
+    case 'K':
+        return is_valid_king_move(src_row, src_col, dest_row, dest_col);
+        break;
     }
 
     return false;
 }
 
-void fen_to_chessboard(const char *fen, ChessGame *game) 
+void fen_to_chessboard(const char *fen, ChessGame *game)
 {
     const int BOARD_DIMENTIONS = 8;
     const char *tempFen = fen;
     int count = 0;
 
-    for(int i = 0; i < BOARD_DIMENTIONS; i++)
+    for (int i = 0; i < BOARD_DIMENTIONS; i++)
     {
-        for(int j = 0; j < BOARD_DIMENTIONS; j++)
+        for (int j = 0; j < BOARD_DIMENTIONS; j++)
         {
-            if(isdigit(*tempFen))
+            if (isdigit(*tempFen))
             {
                 count = atoi(tempFen);
 
-                while(count > 0 && j < BOARD_DIMENTIONS)
+                while (count > 0 && j < BOARD_DIMENTIONS)
                 {
                     game->chessboard[i][j] = '.';
                     count--;
@@ -393,7 +393,7 @@ void fen_to_chessboard(const char *fen, ChessGame *game)
         tempFen++;
     }
 
-    if(*tempFen == 'b')
+    if (*tempFen == 'b')
     {
         game->currentPlayer = BLACK_PLAYER;
     }
@@ -401,36 +401,35 @@ void fen_to_chessboard(const char *fen, ChessGame *game)
     {
         game->currentPlayer = WHITE_PLAYER;
     }
-
 }
 
-int parse_move(const char *move, ChessMove *parsed_move) 
+int parse_move(const char *move, ChessMove *parsed_move)
 {
     int length = strlen(move);
-    if(!(length == 4 || length == 5))
+    if (!(length == 4 || length == 5))
     {
         return PARSE_MOVE_INVALID_FORMAT;
     }
 
-    if((isInvalidLetterIndex(move[0]) || isInvalidLetterIndex(move[2])))
+    if ((isInvalidLetterIndex(move[0]) || isInvalidLetterIndex(move[2])))
     {
         return PARSE_MOVE_INVALID_FORMAT;
     }
 
-    if(isOutOfBounds(((move[1] - 1) - '0'), ((move[3] - 1) - '0')))
+    if (isOutOfBounds(((move[1] - 1) - '0'), ((move[3] - 1) - '0')))
     {
         return PARSE_MOVE_OUT_OF_BOUNDS;
     }
 
-    if(length == 5)
+    if (length == 5)
     {
         int destination = move[3] - '0';
-        if(!((destination == 8) || (destination == 1)))
+        if (!((destination == 8) || (destination == 1)))
         {
             return PARSE_MOVE_INVALID_DESTINATION;
         }
 
-        if(!isValidPromotionPiece(move[4]))
+        if (!isValidPromotionPiece(move[4]))
         {
             return PARSE_MOVE_INVALID_PROMOTION;
         }
@@ -444,7 +443,7 @@ int parse_move(const char *move, ChessMove *parsed_move)
     parsed_move->endSquare[1] = move[3];
     parsed_move->endSquare[2] = '\0';
 
-    if(length == 5)
+    if (length == 5)
     {
         parsed_move->endSquare[2] = move[4];
         parsed_move->endSquare[3] = '\0';
@@ -453,7 +452,7 @@ int parse_move(const char *move, ChessMove *parsed_move)
     return 0;
 }
 
-int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) 
+int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move)
 {
     int src_col = convertMoveToCoordinates(move->startSquare[0]);
     int src_row = 8 - (move->startSquare[1] - '0');
@@ -463,98 +462,98 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     char capturedPiece = '-';
     int length = strlen(move->endSquare);
 
-    if(length == 3)
+    if (length == 3)
     {
-        promotion = move->endSquare[2]; 
+        promotion = move->endSquare[2];
     }
 
-    if(validate_move)
+    if (validate_move)
     {
-        if(is_client && (game->currentPlayer == BLACK_PLAYER))
+        if (is_client && (game->currentPlayer == BLACK_PLAYER))
         {
             return MOVE_OUT_OF_TURN;
         }
 
-        if(!is_client && (game->currentPlayer == WHITE_PLAYER))
+        if (!is_client && (game->currentPlayer == WHITE_PLAYER))
         {
             return MOVE_OUT_OF_TURN;
         }
 
-        if(!hasPiece(src_row, src_col, game))
+        if (!hasPiece(src_row, src_col, game))
         {
             return MOVE_NOTHING;
         }
 
-        if(is_client)
+        if (is_client)
         {
-            if(islower(game->chessboard[src_row][src_col]))
+            if (islower(game->chessboard[src_row][src_col]))
             {
                 return MOVE_WRONG_COLOR;
             }
         }
         else
         {
-            if(isupper(game->chessboard[src_row][src_col]))
+            if (isupper(game->chessboard[src_row][src_col]))
             {
                 return MOVE_WRONG_COLOR;
             }
         }
 
-        if(is_client)
+        if (is_client)
         {
-            if(hasPiece(dest_row, dest_col, game) && isupper(game->chessboard[dest_row][dest_col]))
+            if (hasPiece(dest_row, dest_col, game) && isupper(game->chessboard[dest_row][dest_col]))
             {
                 return MOVE_SUS;
             }
         }
         else
         {
-            if(hasPiece(dest_row, dest_col, game) && islower(game->chessboard[dest_row][dest_col]))
+            if (hasPiece(dest_row, dest_col, game) && islower(game->chessboard[dest_row][dest_col]))
             {
                 return MOVE_SUS;
             }
         }
 
-        if((length == 3) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
+        if ((length == 3) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
         {
             return MOVE_NOT_A_PAWN;
         }
 
-        if(((dest_row == 7) || (dest_row == 0)) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
+        if (((dest_row == 7) || (dest_row == 0)) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
         {
             return MOVE_NOT_A_PAWN;
         }
 
-        if((length == 2) && (toupper(game->chessboard[src_row][src_col] == 'P')))
+        if ((length == 2) && (toupper(game->chessboard[src_row][src_col] == 'P')))
         {
-            if((dest_row == 7) || (dest_row == 0))
+            if ((dest_row == 7) || (dest_row == 0))
             {
                 return MOVE_MISSING_PROMOTION;
             }
         }
 
-        if(!is_valid_move(game->chessboard[src_row][src_col], src_row, src_col, dest_row, dest_col, game))
+        if (!is_valid_move(game->chessboard[src_row][src_col], src_row, src_col, dest_row, dest_col, game))
         {
             return MOVE_WRONG;
         }
     }
 
-    if(hasPiece(dest_row, dest_col, game))
+    if (hasPiece(dest_row, dest_col, game))
     {
         capturedPiece = game->chessboard[dest_row][dest_col];
     }
-    
+
     game->chessboard[dest_row][dest_col] = game->chessboard[src_row][src_col];
     game->chessboard[src_row][src_col] = '.';
 
-    if(promotion != '-')
+    if (promotion != '-')
     {
-        if(game->chessboard[dest_row][dest_col] == 'p')
+        if (game->chessboard[dest_row][dest_col] == 'p')
         {
             game->chessboard[dest_row][dest_col] = tolower(promotion);
         }
 
-        if(game->chessboard[dest_row][dest_col] == 'P')
+        if (game->chessboard[dest_row][dest_col] == 'P')
         {
             game->chessboard[dest_row][dest_col] = toupper(promotion);
         }
@@ -563,14 +562,14 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     game->moves[game->moveCount] = *move;
     game->moveCount++;
 
-    if(capturedPiece != '-')
+    if (capturedPiece != '-')
     {
         game->capturedPieces[game->capturedCount] = capturedPiece;
         game->capturedCount++;
         game->capturedPieces[game->capturedCount] = '\0';
     }
 
-    if(game->currentPlayer == BLACK_PLAYER)
+    if (game->currentPlayer == BLACK_PLAYER)
     {
         game->currentPlayer = WHITE_PLAYER;
     }
@@ -582,7 +581,8 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
     return 0;
 }
 
-int send_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
+int send_command(ChessGame *game, const char *message, int socketfd, bool is_client)
+{
     (void)game;
     (void)message;
     (void)socketfd;
@@ -590,7 +590,8 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
     return -999;
 }
 
-int receive_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
+int receive_command(ChessGame *game, const char *message, int socketfd, bool is_client)
+{
     (void)game;
     (void)message;
     (void)socketfd;
@@ -598,28 +599,140 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
     return -999;
 }
 
-int save_game(ChessGame *game, const char *username, const char *db_filename) {
-    (void)game;
-    (void)username;
-    (void)db_filename;
-    return -999;
+int save_game(ChessGame *game, const char *username, const char *db_filename)
+{
+    FILE *gameFile = NULL;
+    if ((gameFile = fopen(db_filename, "a")) == NULL)
+    {
+        return -1;
+    }
+
+    const char *temp = username;
+
+    while (*temp)
+    {
+        if (*temp == ' ')
+        {
+            return -1;
+        }
+        temp++;
+    }
+
+    char fen[BUFFER_SIZE];
+    chessboard_to_fen(fen, game);
+
+    fprintf(gameFile, "%s:%s\n", username, fen);
+    fclose(gameFile);
+
+    return 0;
 }
 
-int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number) {
-    (void)game;
-    (void)username;
-    (void)db_filename;
-    (void)save_number;
-    return -999;
+int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number)
+{
+    FILE *gameFile = NULL;
+    int length = strlen(username);
+    int countSaveNumber = 1;
+
+    if ((gameFile = fopen(db_filename, "r")) == NULL)
+    {
+        return -1;
+    }
+
+    char name[length + 1];
+    char fen[BUFFER_SIZE];
+    int fenIndex = 0;
+    char temp = '-';
+    const char *testUsername = username;
+    bool breaker = false;
+    bool endOfFile = false;
+
+    while (*testUsername)
+    {
+        if (*testUsername == ' ')
+        {
+            return -1;
+        }
+        testUsername++;
+    }
+
+    while (countSaveNumber <= save_number)
+    {
+        for (int i = 0; i < length; i++)
+        {
+            if((fscanf(gameFile, "%c", &name[i])) == EOF)
+            {
+                endOfFile = true;
+                break;
+            }
+        }
+        name[length] = '\0';
+
+        if(endOfFile)
+        {
+            break;
+        }
+
+        if (strncmp(name, username, length) == 0)
+        {
+            if (countSaveNumber == save_number)
+            {
+                fseek(gameFile, 1, SEEK_CUR);
+                while (1)
+                {
+                    fscanf(gameFile, "%c", &fen[fenIndex]);
+
+                    if(fen[fenIndex] == '\0')
+                    {
+                        breaker = true;
+                        break;
+                    }
+
+                    fenIndex++;
+                }
+
+                if(breaker)
+                {
+                    break;
+                }
+            }
+
+            countSaveNumber++;
+        }
+
+        while (temp != '\n')
+        {
+            if((fscanf(gameFile, "%c", &temp)) == EOF)
+            {
+                endOfFile = true;
+                break;
+            }
+        }
+
+        if(endOfFile)
+        {
+            break;
+        }
+    }
+
+    if(!breaker || endOfFile)
+    {
+        return -1;
+    }
+
+    fen_to_chessboard(fen, game);
+
+    return 0;
 }
 
-void display_chessboard(ChessGame *game) 
+void display_chessboard(ChessGame *game)
 {
     printf("\nChessboard:\n");
     printf("  a b c d e f g h\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++)
+    {
         printf("%d ", 8 - i);
-        for (int j = 0; j < 8; j++) {
+        for (int j = 0; j < 8; j++)
+        {
             printf("%c ", game->chessboard[i][j]);
         }
         printf("%d\n", 8 - i);
@@ -629,16 +742,16 @@ void display_chessboard(ChessGame *game)
 
 bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game)
 {
-    int differenceRow =  abs(dest_row - src_row);
+    int differenceRow = abs(dest_row - src_row);
     int differenceCol = abs(src_col - dest_col);
 
-    if(src_row == dest_row)
+    if (src_row == dest_row)
     {
-        if(dest_col < src_col)
+        if (dest_col < src_col)
         {
-            for(int i = (src_col - 1); i > dest_col; i--)
+            for (int i = (src_col - 1); i > dest_col; i--)
             {
-                if(hasPiece(src_row, i, game))
+                if (hasPiece(src_row, i, game))
                 {
                     return true;
                 }
@@ -646,9 +759,9 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
         }
         else
         {
-            for(int i = (src_col + 1); i < dest_col; i++)
+            for (int i = (src_col + 1); i < dest_col; i++)
             {
-                if(hasPiece(src_row, i, game))
+                if (hasPiece(src_row, i, game))
                 {
                     return true;
                 }
@@ -656,13 +769,13 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
         }
     }
 
-    if(src_col == dest_col)
+    if (src_col == dest_col)
     {
-        if(dest_row < src_row)
+        if (dest_row < src_row)
         {
-            for(int i = (src_row - 1); i > dest_row; i--)
+            for (int i = (src_row - 1); i > dest_row; i--)
             {
-                if(hasPiece(i, src_col, game))
+                if (hasPiece(i, src_col, game))
                 {
                     return true;
                 }
@@ -670,9 +783,9 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
         }
         else
         {
-            for(int i = (src_row + 1); i < dest_row; i++)
+            for (int i = (src_row + 1); i < dest_row; i++)
             {
-                if(hasPiece(i, src_col, game))
+                if (hasPiece(i, src_col, game))
                 {
                     return true;
                 }
@@ -680,15 +793,15 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
         }
     }
 
-    if(differenceRow == differenceCol)
+    if (differenceRow == differenceCol)
     {
-        if(dest_col > src_col)
+        if (dest_col > src_col)
         {
-            if(dest_row > src_row)
+            if (dest_row > src_row)
             {
-                for(int i = (src_row + 1), j = (src_col + 1); i < dest_row && j < dest_col; i++, j++)
+                for (int i = (src_row + 1), j = (src_col + 1); i < dest_row && j < dest_col; i++, j++)
                 {
-                    if(hasPiece(i, j, game))
+                    if (hasPiece(i, j, game))
                     {
                         return true;
                     }
@@ -696,9 +809,9 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
             }
             else
             {
-                for(int i = (src_row - 1), j = (src_col + 1); i > dest_row && j < dest_col; i--, j++)
+                for (int i = (src_row - 1), j = (src_col + 1); i > dest_row && j < dest_col; i--, j++)
                 {
-                    if(hasPiece(i, j, game))
+                    if (hasPiece(i, j, game))
                     {
                         return true;
                     }
@@ -707,11 +820,11 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
         }
         else
         {
-            if(dest_row > src_row)
+            if (dest_row > src_row)
             {
-                for(int i = (src_row + 1), j = (src_col - 1); i < dest_row && j > dest_col; i++, j--)
+                for (int i = (src_row + 1), j = (src_col - 1); i < dest_row && j > dest_col; i++, j--)
                 {
-                    if(hasPiece(i, j, game))
+                    if (hasPiece(i, j, game))
                     {
                         return true;
                     }
@@ -719,9 +832,9 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
             }
             else
             {
-                for(int i = (src_row - 1), j = (src_col - 1); i > dest_row && j > dest_col; i--, j--)
+                for (int i = (src_row - 1), j = (src_col - 1); i > dest_row && j > dest_col; i--, j--)
                 {
-                    if(hasPiece(i, j, game))
+                    if (hasPiece(i, j, game))
                     {
                         return true;
                     }
@@ -735,7 +848,7 @@ bool isBlocked(int src_row, int src_col, int dest_row, int dest_col, ChessGame *
 
 bool hasPiece(int row, int col, ChessGame *game)
 {
-    if(game->chessboard[row][col] == '.')
+    if (game->chessboard[row][col] == '.')
     {
         return false;
     }
@@ -745,12 +858,12 @@ bool hasPiece(int row, int col, ChessGame *game)
 
 bool isOutOfBounds(int row, int col)
 {
-    if(row < 0 || row > 7)
+    if (row < 0 || row > 7)
     {
         return true;
     }
 
-    if(col < 0 || col > 7)
+    if (col < 0 || col > 7)
     {
         return true;
     }
@@ -760,19 +873,19 @@ bool isOutOfBounds(int row, int col)
 
 int countSquares(int src_row, int src_col, int dest_row, int dest_col)
 {
-    int differenceRow =  abs(dest_row - src_row);
+    int differenceRow = abs(dest_row - src_row);
     int differenceCol = abs(src_col - dest_col);
     int difference = 0;
 
-    if(differenceRow == differenceCol)
+    if (differenceRow == differenceCol)
     {
         difference = differenceRow;
     }
-    else if(differenceRow == 0)
+    else if (differenceRow == 0)
     {
         difference = differenceCol;
     }
-    else if(differenceCol == 0)
+    else if (differenceCol == 0)
     {
         difference = differenceRow;
     }
@@ -781,7 +894,7 @@ int countSquares(int src_row, int src_col, int dest_row, int dest_col)
         return -1;
     }
 
-    if(difference > 0)
+    if (difference > 0)
     {
         return difference;
     }
@@ -791,16 +904,24 @@ int countSquares(int src_row, int src_col, int dest_row, int dest_col)
 
 bool isInvalidLetterIndex(char letter)
 {
-    switch(letter)
+    switch (letter)
     {
-        case 'a': return false;
-        case 'b': return false;
-        case 'c': return false;
-        case 'd': return false;
-        case 'e': return false;
-        case 'f': return false;
-        case 'g': return false;
-        case 'h': return false;
+    case 'a':
+        return false;
+    case 'b':
+        return false;
+    case 'c':
+        return false;
+    case 'd':
+        return false;
+    case 'e':
+        return false;
+    case 'f':
+        return false;
+    case 'g':
+        return false;
+    case 'h':
+        return false;
     }
 
     return true;
@@ -808,12 +929,16 @@ bool isInvalidLetterIndex(char letter)
 
 bool isValidPromotionPiece(char piece)
 {
-    switch(piece)
+    switch (piece)
     {
-        case 'n': return true;
-        case 'q': return true;
-        case 'b': return true;
-        case 'r': return true;
+    case 'n':
+        return true;
+    case 'q':
+        return true;
+    case 'b':
+        return true;
+    case 'r':
+        return true;
     }
 
     return false;
@@ -821,16 +946,24 @@ bool isValidPromotionPiece(char piece)
 
 int convertMoveToCoordinates(char row)
 {
-    switch(row)
+    switch (row)
     {
-        case 'a': return 0;
-        case 'b': return 1;
-        case 'c': return 2;
-        case 'd': return 3;
-        case 'e': return 4;
-        case 'f': return 5;
-        case 'g': return 6;
-        case 'h': return 7;
+    case 'a':
+        return 0;
+    case 'b':
+        return 1;
+    case 'c':
+        return 2;
+    case 'd':
+        return 3;
+    case 'e':
+        return 4;
+    case 'f':
+        return 5;
+    case 'g':
+        return 6;
+    case 'h':
+        return 7;
     }
 
     return -1;
