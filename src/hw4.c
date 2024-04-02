@@ -13,6 +13,8 @@ bool isInvalidLetterIndex(char letter);
 
 bool isValidPromotionPiece(char piece);
 
+int convertMoveToCoordinates(char row);
+
 void initialize_game(ChessGame *game) 
 {
     const int BOARD_DIMENTIONS = 8; // The board is and 8x8 board.
@@ -284,7 +286,7 @@ bool is_valid_knight_move(int src_row, int src_col, int dest_row, int dest_col)
 
 bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) 
 {
-    if(countSquares(src_row, src_col, dest_row, dest_col) == -1)
+    if(abs(dest_row - src_row) != abs(dest_col - src_col))
     {
         return false;
     }
@@ -451,12 +453,133 @@ int parse_move(const char *move, ChessMove *parsed_move)
     return 0;
 }
 
-int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
-    (void)game;
-    (void)move;
-    (void)is_client;
-    (void)validate_move;
-    return -999;
+int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) 
+{
+    int src_col = convertMoveToCoordinates(move->startSquare[0]);
+    int src_row = 8 - (move->startSquare[1] - '0');
+    int dest_col = convertMoveToCoordinates(move->endSquare[0]);
+    int dest_row = 8 - (move->endSquare[1] - '0');
+    char promotion = '-';
+    char capturedPiece = '-';
+    int length = strlen(move->endSquare);
+
+    if(length == 3)
+    {
+        promotion = move->endSquare[2]; 
+    }
+
+    if(validate_move)
+    {
+        if(is_client && (game->currentPlayer == BLACK_PLAYER))
+        {
+            return MOVE_OUT_OF_TURN;
+        }
+
+        if(!is_client && (game->currentPlayer == WHITE_PLAYER))
+        {
+            return MOVE_OUT_OF_TURN;
+        }
+
+        if(!hasPiece(src_row, src_col, game))
+        {
+            return MOVE_NOTHING;
+        }
+
+        if(is_client)
+        {
+            if(islower(game->chessboard[src_row][src_col]))
+            {
+                return MOVE_WRONG_COLOR;
+            }
+        }
+        else
+        {
+            if(isupper(game->chessboard[src_row][src_col]))
+            {
+                return MOVE_WRONG_COLOR;
+            }
+        }
+
+        if(is_client)
+        {
+            if(hasPiece(dest_row, dest_col, game) && isupper(game->chessboard[dest_row][dest_col]))
+            {
+                return MOVE_SUS;
+            }
+        }
+        else
+        {
+            if(hasPiece(dest_row, dest_col, game) && islower(game->chessboard[dest_row][dest_col]))
+            {
+                return MOVE_SUS;
+            }
+        }
+
+        if((length == 3) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
+        {
+            return MOVE_NOT_A_PAWN;
+        }
+
+        if(((dest_row == 7) || (dest_row == 0)) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
+        {
+            return MOVE_NOT_A_PAWN;
+        }
+
+        if((length == 2) && (toupper(game->chessboard[src_row][src_col] == 'P')))
+        {
+            if((dest_row == 7) || (dest_row == 0))
+            {
+                return MOVE_MISSING_PROMOTION;
+            }
+        }
+
+        if(!is_valid_move(game->chessboard[src_row][src_col], src_row, src_col, dest_row, dest_col, game))
+        {
+            return MOVE_WRONG;
+        }
+    }
+
+    if(hasPiece(dest_row, dest_col, game))
+    {
+        capturedPiece = game->chessboard[dest_row][dest_col];
+    }
+    
+    game->chessboard[dest_row][dest_col] = game->chessboard[src_row][src_col];
+    game->chessboard[src_row][src_col] = '.';
+
+    if(promotion != '-')
+    {
+        if(game->chessboard[dest_row][dest_col] == 'p')
+        {
+            game->chessboard[dest_row][dest_col] = tolower(promotion);
+        }
+
+        if(game->chessboard[dest_row][dest_col] == 'P')
+        {
+            game->chessboard[dest_row][dest_col] = toupper(promotion);
+        }
+    }
+
+    game->moves[game->moveCount] = *move;
+    game->moveCount++;
+
+    if(capturedPiece != '-')
+    {
+        game->capturedPieces[game->capturedCount] = capturedPiece;
+        game->capturedCount++;
+        game->capturedPieces[game->capturedCount] = '\0';
+    }
+
+    if(game->currentPlayer == BLACK_PLAYER)
+    {
+        game->currentPlayer = WHITE_PLAYER;
+    }
+    else
+    {
+        game->currentPlayer = BLACK_PLAYER;
+    }
+
+    return 0;
 }
 
 int send_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
@@ -694,4 +817,21 @@ bool isValidPromotionPiece(char piece)
     }
 
     return false;
+}
+
+int convertMoveToCoordinates(char row)
+{
+    switch(row)
+    {
+        case 'a': return 0;
+        case 'b': return 1;
+        case 'c': return 2;
+        case 'd': return 3;
+        case 'e': return 4;
+        case 'f': return 5;
+        case 'g': return 6;
+        case 'h': return 7;
+    }
+
+    return -1;
 }
