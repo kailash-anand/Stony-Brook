@@ -414,7 +414,7 @@ int parse_move(const char *move, ChessMove *parsed_move)
         return PARSE_MOVE_INVALID_FORMAT;
     }
 
-    if((isInvalidLetterIndex(move[0]) && isInvalidLetterIndex(move[2])))
+    if((isInvalidLetterIndex(move[0]) || isInvalidLetterIndex(move[2])))
     {
         return PARSE_MOVE_INVALID_FORMAT;
     }
