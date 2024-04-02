@@ -132,25 +132,21 @@ void chessboard_to_fen(char fen[], ChessGame *game)
             }
         }
 
-        if(i == (BOARD_DIMENTIONS - 1))
-        {
-            break;
-        }
-
         *tempFen = '/';
         tempFen++;
     }
 
+    tempFen--;
     *tempFen = ' ';
     tempFen++;
 
-    if((game->moveCount % 2) == 0)
+    if(game->currentPlayer == BLACK_PLAYER)
     {
-        *tempFen = 'w';
+        *tempFen = 'b';
     }
     else
     {
-        *tempFen = 'b';
+        *tempFen = 'w';
     }
 
     tempFen++;
