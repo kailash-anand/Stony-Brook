@@ -363,9 +363,47 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
     return false;
 }
 
-void fen_to_chessboard(const char *fen, ChessGame *game) {
-    (void)fen;
-    (void)game;
+void fen_to_chessboard(const char *fen, ChessGame *game) 
+{
+    const int BOARD_DIMENTIONS = 8;
+    const char *tempFen = fen;
+    int count = 0;
+
+    for(int i = 0; i < BOARD_DIMENTIONS; i++)
+    {
+        for(int j = 0; j < BOARD_DIMENTIONS; j++)
+        {
+            if(isdigit(*tempFen))
+            {
+                count = atoi(tempFen);
+
+                while(count > 0 && j < BOARD_DIMENTIONS)
+                {
+                    game->chessboard[i][j] = '.';
+                    count--;
+                    j++;
+                }
+                j--;
+                tempFen++;
+            }
+            else
+            {
+                game->chessboard[i][j] = *tempFen;
+                tempFen++;
+            }
+        }
+        tempFen++;
+    }
+
+    if(*tempFen == 'b')
+    {
+        game->currentPlayer = BLACK_PLAYER;
+    }
+    else
+    {
+        game->currentPlayer = WHITE_PLAYER;
+    }
+
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) 
