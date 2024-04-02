@@ -102,9 +102,59 @@ void initialize_game(ChessGame *game)
     }
 }
 
-void chessboard_to_fen(char fen[], ChessGame *game) {
-    (void)fen;
-    (void)game;
+void chessboard_to_fen(char fen[], ChessGame *game) 
+{
+    const int BOARD_DIMENTIONS = 8;
+    int count = 0;
+    char *tempFen = fen;
+
+    for(int i = 0; i < BOARD_DIMENTIONS; i++)
+    {
+        for(int j = 0; j < BOARD_DIMENTIONS; j++)
+        {
+            if(hasPiece(i, j, game))
+            {
+                *tempFen = game->chessboard[i][j];
+                tempFen++;
+            }
+            else
+            {
+                while(!hasPiece(i, j, game) && (j < BOARD_DIMENTIONS))
+                {
+                    count++;
+                    j++;
+                }
+                j--;
+                
+                *tempFen = count + '0';
+                tempFen++;
+                count = 0;
+            }
+        }
+
+        if(i == (BOARD_DIMENTIONS - 1))
+        {
+            break;
+        }
+
+        *tempFen = '/';
+        tempFen++;
+    }
+
+    *tempFen = ' ';
+    tempFen++;
+
+    if((game->moveCount % 2) == 0)
+    {
+        *tempFen = 'w';
+    }
+    else
+    {
+        *tempFen = 'b';
+    }
+
+    tempFen++;
+    *tempFen = '\0';
 }
 
 bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) 
