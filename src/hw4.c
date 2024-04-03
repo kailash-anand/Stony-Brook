@@ -519,10 +519,10 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
             return MOVE_NOT_A_PAWN;
         }
 
-        if (((dest_row == 7) || (dest_row == 0)) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
-        {
-            return MOVE_NOT_A_PAWN;
-        }
+        // if (((dest_row == 7) || (dest_row == 0)) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
+        // {
+        //     return MOVE_NOT_A_PAWN;
+        // }
 
         if ((length == 2) && (toupper(game->chessboard[src_row][src_col] == 'P')))
         {
