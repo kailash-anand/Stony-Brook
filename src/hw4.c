@@ -623,7 +623,7 @@ int save_game(ChessGame *game, const char *username, const char *db_filename)
 
     fprintf(gameFile, "%s:%s\n", username, fen);
     fclose(gameFile);
-
+    
     return 0;
 }
 
