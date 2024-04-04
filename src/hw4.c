@@ -643,7 +643,7 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
     int fenIndex = 0;
     char temp = '-';
     bool breaker = false;
-    bool endOfFile = false;
+    //bool endOfFile = false;
 
     while (countSaveNumber <= save_number)
     {
@@ -688,8 +688,8 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
         {
             if((fscanf(gameFile, "%c", &temp)) == EOF)
             {
-                endOfFile = true;
-                break;
+                // endOfFile = true;
+                // break;
             }
         }
 
