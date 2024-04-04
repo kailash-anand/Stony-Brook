@@ -651,8 +651,8 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
         {
             if((fscanf(gameFile, "%c", &name[i])) == EOF)
             {
-                endOfFile = true;
-                break;
+                // endOfFile = true;
+                // break;
             }
         }
         name[length] = '\0';
@@ -693,13 +693,13 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
             }
         }
 
-        if(endOfFile)
-        {
-            break;
-        }
+        // if(endOfFile)
+        // {
+        //     break;
+        // }
     }
 
-    if(!breaker || endOfFile)
+    if(!breaker)
     {
         return -1;
     }
