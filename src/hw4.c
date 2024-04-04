@@ -672,11 +672,6 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
         }
         name[length] = '\0';
 
-        if(endOfFile)
-        {
-            break;
-        }
-
         if (strncmp(name, username, length) == 0)
         {
             if (countSaveNumber == save_number)
