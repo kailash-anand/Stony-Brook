@@ -638,27 +638,12 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
         return -1;
     }
 
-    if(strncmp(username, "", 1) == 0)
-    {
-        return -1;
-    }
-
     char name[length + 1];
     char fen[BUFFER_SIZE];
     int fenIndex = 0;
     char temp = '-';
-    const char *testUsername = username;
     bool breaker = false;
     bool endOfFile = false;
-
-    while (*testUsername)
-    {
-        if (*testUsername == ' ')
-        {
-            return -1;
-        }
-        testUsername++;
-    }
 
     while (countSaveNumber <= save_number)
     {
