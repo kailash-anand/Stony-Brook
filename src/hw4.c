@@ -519,11 +519,6 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
             return MOVE_NOT_A_PAWN;
         }
 
-        // if (((dest_row == 7) || (dest_row == 0)) && (toupper(game->chessboard[src_row][src_col]) != 'P'))
-        // {
-        //     return MOVE_NOT_A_PAWN;
-        // }
-
         if ((length == 2) && (toupper(game->chessboard[src_row][src_col] == 'P')))
         {
             if ((dest_row == 7) || (dest_row == 0))
@@ -737,9 +732,7 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
 
         return COMMAND_ERROR;
     }
-
-    (void)socketfd;
-    (void)is_client;
+    
     return -1;
 }
 
@@ -774,7 +767,6 @@ int save_game(ChessGame *game, const char *username, const char *db_filename)
 int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number)
 {
     FILE *gameFile = NULL;
-    int length = strlen(username);
     int countSaveNumber = 1;
 
     if ((gameFile = fopen(db_filename, "r")) == NULL)
@@ -782,7 +774,8 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
         return -1;
     }
 
-    char name[length + 1];
+    char name[100];
+    int nameIndex = 0;
     char fen[BUFFER_SIZE];
     int fenIndex = 0;
     char temp = '-';
@@ -791,21 +784,28 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
 
     while (countSaveNumber <= save_number)
     {
-        for (int i = 0; i < length; i++)
+        nameIndex = 0;
+        while(1)
         {
-            if ((fscanf(gameFile, "%c", &name[i])) == EOF)
+            if(fscanf(gameFile, "%c", &name[nameIndex]) == EOF)
             {
                 endOfFile = true;
                 break;
             }
-        }
-        name[length] = '\0';
 
-        if (strncmp(name, username, length) == 0)
+            if(name[nameIndex] == ':')
+            {
+                name[nameIndex] = '\0';
+                break;
+            }
+
+            nameIndex++;
+        }
+
+        if (strncmp(name, username, (nameIndex + 1)) == 0)
         {
             if (countSaveNumber == save_number)
             {
-                fseek(gameFile, 1, SEEK_CUR);
                 while (1)
                 {
                     fscanf(gameFile, "%c", &fen[fenIndex]);
@@ -842,6 +842,8 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
             break;
         }
     }
+
+    fclose(gameFile);
 
     if (!breaker || endOfFile)
     {
