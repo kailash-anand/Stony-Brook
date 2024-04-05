@@ -674,18 +674,73 @@ int send_command(ChessGame *game, const char *message, int socketfd, bool is_cli
         }
     }
 
-    (void)socketfd;
-    (void)is_client;
     return COMMAND_UNKNOWN;
 }
 
 int receive_command(ChessGame *game, const char *message, int socketfd, bool is_client)
 {
-    (void)game;
-    (void)message;
+    const char *tempMessagePointer = message;
+    const char *file = "game_database.txt";
+
+    while (*tempMessagePointer != ' ')
+    {
+        tempMessagePointer++;
+    }
+    tempMessagePointer++;
+
+    int length = strlen(tempMessagePointer);
+
+    if(strncmp(message, "/move", 5) == 0)
+    {
+        ChessMove move;
+        if(parse_move(tempMessagePointer, &move) == 0)
+        {
+            make_move(game, &move, is_client, false);
+            return COMMAND_MOVE;
+        }
+
+        return COMMAND_ERROR;
+    }
+
+    if(strncmp(message, "/forfeit", 8) == 0)
+    {
+        close(socketfd);
+        return COMMAND_FORFEIT;
+    }
+
+    if(strncmp(message, "/import", 7) == 0)
+    {
+        if(is_client)
+        {
+            fen_to_chessboard(tempMessagePointer, game);
+            return COMMAND_IMPORT;
+        }
+    }
+
+    if(strncmp(message, "/load", 5) == 0)
+    {
+        char username[length - 1];
+
+        for (int i = 0; i < (length - 1); i++)
+        {
+            username[i] = *tempMessagePointer;
+            tempMessagePointer++;
+        }
+        username[length - 2] = '\0';
+
+        int saveCount = *tempMessagePointer - '0';
+
+        if(load_game(game, username, file, saveCount) == 0)
+        {
+            return COMMAND_LOAD;
+        }
+
+        return COMMAND_ERROR;
+    }
+
     (void)socketfd;
     (void)is_client;
-    return -999;
+    return -1;
 }
 
 int save_game(ChessGame *game, const char *username, const char *db_filename)
