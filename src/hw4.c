@@ -746,6 +746,11 @@ int save_game(ChessGame *game, const char *username, const char *db_filename)
 
     const char *temp = username;
 
+    if(strlen(username) < 1)
+    {
+        return -1;
+    }
+
     while (*temp)
     {
         if (*temp == ' ')
