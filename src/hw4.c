@@ -583,11 +583,100 @@ int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_mo
 
 int send_command(ChessGame *game, const char *message, int socketfd, bool is_client)
 {
-    (void)game;
-    (void)message;
+    const char *tempMessagePointer = message;
+    const char *file = "game_database.txt";
+
+    while (*tempMessagePointer != ' ')
+    {
+        tempMessagePointer++;
+    }
+    tempMessagePointer++;
+
+    int length = strlen(tempMessagePointer);
+
+    if (strncmp(message, "/move", 5) == 0)
+    {
+        ChessMove move;
+        if(parse_move(tempMessagePointer, &move) == 0)
+        {
+            if(make_move(game, &move, is_client, true) == 0)
+            {
+                return COMMAND_MOVE;
+            }
+        }
+    
+        return COMMAND_ERROR;
+    }
+
+    if (strncmp(message, "/forfeit", 8) == 0)
+    {
+        send(socketfd, message, sizeof(message), 0);
+        return COMMAND_FORFEIT;
+    }
+
+    if (strncmp(message, "/chessboard", 11) == 0)
+    {
+        display_chessboard(game);
+        return COMMAND_DISPLAY;
+    }
+
+    if (strncmp(message, "/import", 7) == 0)
+    {
+        if(!is_client)
+        {
+            fen_to_chessboard(tempMessagePointer, game);
+            return COMMAND_IMPORT;
+        }
+    }
+
+    if (strncmp(message, "/load", 5) == 0)
+    {
+        char username[length - 1];
+
+        for (int i = 0; i < (length - 1); i++)
+        {
+            username[i] = *tempMessagePointer;
+            tempMessagePointer++;
+        }
+        username[length - 2] = '\0';
+
+        int saveCount = *tempMessagePointer - '0';
+
+        if(load_game(game, username, file, saveCount) == 0)
+        {
+            send(socketfd, message, sizeof(message), 0);
+            return COMMAND_LOAD;
+        }
+        else
+        {
+            return COMMAND_ERROR;
+        }
+    }
+
+    if (strncmp(message, "/save", 5) == 0)
+    {
+        char username[length + 1];
+
+        for (int i = 0; i < length; i++)
+        {
+            username[i] = *tempMessagePointer;
+            tempMessagePointer++;
+        }
+        username[length] = '\0';
+
+        if (save_game(game, username, file) == 0)
+        {
+            return COMMAND_SAVE;
+        }
+        else
+        {
+            return COMMAND_ERROR;
+        }
+    }
+
     (void)socketfd;
     (void)is_client;
-    return -999;
+    return COMMAND_UNKNOWN;
 }
 
 int receive_command(ChessGame *game, const char *message, int socketfd, bool is_client)
@@ -623,7 +712,7 @@ int save_game(ChessGame *game, const char *username, const char *db_filename)
 
     fprintf(gameFile, "%s:%s\n", username, fen);
     fclose(gameFile);
-    
+
     return 0;
 }
 
@@ -649,7 +738,7 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
     {
         for (int i = 0; i < length; i++)
         {
-            if((fscanf(gameFile, "%c", &name[i])) == EOF)
+            if ((fscanf(gameFile, "%c", &name[i])) == EOF)
             {
                 endOfFile = true;
                 break;
@@ -666,7 +755,7 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
                 {
                     fscanf(gameFile, "%c", &fen[fenIndex]);
 
-                    if(fen[fenIndex] == '\0')
+                    if (fen[fenIndex] == '\0')
                     {
                         breaker = true;
                         break;
@@ -675,7 +764,7 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
                     fenIndex++;
                 }
 
-                if(breaker)
+                if (breaker)
                 {
                     break;
                 }
@@ -686,20 +775,20 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
 
         while (temp != '\n')
         {
-            if((fscanf(gameFile, "%c", &temp)) == EOF)
+            if ((fscanf(gameFile, "%c", &temp)) == EOF)
             {
                 endOfFile = true;
                 break;
             }
         }
 
-        if(endOfFile)
+        if (endOfFile)
         {
             break;
         }
     }
 
-    if(!breaker || endOfFile)
+    if (!breaker || endOfFile)
     {
         return -1;
     }
