@@ -4,13 +4,13 @@
 .text
 
 init_student:
-	li $t0 0  # Intializing t0 to 0
-	li $t1 0  # Intializing t1 to 0
+	li $t7 0  # Intializing t0 to 0
+	li $t8 0  # Intializing t1 to 0
 
-	sll $t0 $a0 10  # Shifting the first argument (id) by 10 bits to the left into t0
-	or $t1 $t0 $a1  # Storing the id and name in a temp variable t1
+	sll $t7 $a0 10  # Shifting the first argument (id) by 10 bits to the left into t0
+	or $t8 $t7 $a1  # Storing the id and name in a temp variable t1
 
-	sw $t1 0($a3)  # Storing id and name in the struct
+	sw $t8 0($a3)  # Storing id and name in the struct
 	sw $a2 4($a3)  # Store the name in the struct
 
 	jr $ra
@@ -51,6 +51,60 @@ print_student:
 	jr $ra
 	
 init_student_array:
+	li $t0 0  # Intializing loop variable i in t0 
+	li $t1 0  # Initialize temp for first argument (number of students)
+	li $t2 0  # Initialize temp for second argument (id)
+	li $t3 0  # Initialize temp for third argument (credits)
+	li $t4 0  # Initialize temp for fourth argument (names)
+	li $t5 0  # Initialize temp for fifth argument (records)
+	li $t6 0  # Initialize temp for name traversal 
+
+	move $t1 $a0  # Move all arguments to temporaries 
+	move $t2 $a1  # Need this as arguments will be modified to call another function (init_student)
+	move $t3 $a2  
+	move $t4 $a3 
+
+	move $fp $sp  # Initializing frame pointer to start position
+	addi $sp $sp -4  # Allocating space for one element in the stack pointer (sp)
+
+	lw $t5 0($fp)  # Store fifth argument in temp variable (t5) 
+	sw $ra 0($sp)  # Store return address (ra) of caller in the stack
+
+	lw $a0 0($t2)  # Move id to first argument (a0)
+	lw $a1 0($t3)  # Move credits to second argument (a1)
+	move $a2 $t4  # Move names to third argument (a2)
+	move $a3 $t5  # Move records to fourth argument (a3)
+
+	while:
+		beq $t0 $t1 done  # Condition to terminate loop
+		jal init_student  # Function call to initialize student at i th index
+
+		addi $t2 $t2 4 # Increment the index in id, credits and record
+		addi $t3 $t3 4
+		addi $t5 $t5 8
+		
+		loop:
+			lbu $t6 0($t4)  # Load character in temp
+			beqz $t6 exit
+			addi $t4 $t4 1  
+			j loop
+			
+		exit:
+			addi $t4 $t4 1
+		
+		lw $a0 0($t2)  # Load from the temp into the arguments
+		lw $a1 0($t3)  # Loading id and credits as values and name and record as pointers
+		move $a2 $t4
+		move $a3 $t5
+
+		addi $t0 $t0 1  # Increment loop variable i by 1
+		j while 
+
+	done:
+
+	lw $ra 0($sp)  # Storing callers return address in stack back in ra
+	addi $sp $sp 4  # Deallocating stack	
+
 	jr $ra
 	
 insert:
