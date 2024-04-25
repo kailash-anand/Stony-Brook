@@ -108,6 +108,72 @@ init_student_array:
 	jr $ra
 	
 insert:
+	li $t0 0  # Initializing t0 to 0 (Stores id)
+	li $t1 0  # Initializing t1 to 0 (Stores credits)
+	li $t2 0  # Intializing t2 to 0 (Stores name)
+	move $t7 $a1  # Storing the table in a temp variable t7
+	
+	li $t8 0 # Temp value for retrieving from the table
+
+	li $t3 0  # Intializing t3 to store index
+	li $t6 0  # Initializing t6 to store loop variable (count) (counts no. of iterations) and i (increment)
+
+	li $t4 0  # Empty symbol 
+	li $t5 -1  # Tombstone symbol
+
+	lw $t1 0($a0)  # Load id and credits in t0
+	lw $t2 4($a0)  # Load name in t1
+
+	srl $t0 $t1 10  # Shift by 10 to remove credits and store id in t2
+
+	sll $t1 $t1 22  # Left shift then immediately right shift by 22 to remove id
+	srl $t1 $t1 22
+
+	div $t0 $a2  # Generating index step 1
+	mfhi $t3  # Generating index step 2
+	
+	for2:
+		beq $t6 $t3 reset  # If t6 (i) reaches the index
+		
+		addi $t7 $t7 4  # Incrementing table pointer
+		addi $t6 $t6 1  # Incrementing t6 (i) by 1
+		
+		j for2
+		
+	reset:
+		li $t6 0  # Reinitializing t6 (count) for use
+		j for
+		
+	cycle:
+		li $t3 0
+		move $t7 $a1
+		
+	for:  # Loop through the table starting at index till cycle is completed
+		beq $t6 $a2 stop  # If the value is not inserted and t6 (count) reaches a2 (size of table)
+		beq $t3 $a2 cycle  
+		
+		lw $t8 0($t7)
+		
+		beq $t8 $t4 put
+		beq $t8 $t5 put
+		
+		addi $t7 $t7 4  # Increment the table pointer 
+		addi $t6 $t6 1  # Increment t6 (count) by 1
+		addi $t3 $t3 1  # Increment index
+		
+		j for
+
+	put:
+		sw $a0 0($t7)
+		move $v0 $t3
+		j end
+
+	stop:
+		li $v0 -1
+		j end
+		
+	end:
+
 	jr $ra
 	
 search:
