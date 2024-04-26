@@ -177,7 +177,109 @@ insert:
 	jr $ra
 	
 search:
+	li $t0 0 # Temp value for retrieving from the table
+
+	li $t1 0  # Intializing t1 to store index
+	li $t2 0  # Initializing t2 to store loop variable (count) (counts no. of iterations) and i (increment)
+
+	li $t3 0  # Empty symbol 
+	li $t4 -1  # Tombstone symbol
+	
+	li $t6 0  # Stores the id of the retrieved record.
+	
+	move $t5 $a1  # Storing the table in a temp variable t5
+	
+	div $a0 $a2  # Generating index step 1
+	mfhi $t1  # Generating index step 2
+	
+	for3:
+		beq $t2 $t1 reset2  # If t6 (i) reaches the index
+		
+		addi $t5 $t5 4  # Incrementing table pointer
+		addi $t2 $t2 1  # Incrementing t6 (i) by 1
+		
+		j for3
+		
+	reset2:
+		li $t2 0  # Reinitializing t6 (count) for use
+		j for4
+		
+	cycle2:
+		li $t1 0
+		move $t5 $a1
+		
+	for4:  # Loop through the table starting at index till cycle is completed
+		beq $t2 $a2 finish  # If the value is not inserted and t2 (count) reaches a2 (size of table)
+		beq $t1 $a2 cycle2  
+		
+		lw $t0 0($t5)
+		
+		beq $t0 $t3 finish
+		beq $t0 $t4 tombstone
+		
+		lw $t0 0($t0)
+		srl $t6 $t0 10  # Store the id of the current record in the table
+		
+		beq $a0 $t6 found
+		
+		tombstone: 
+		
+		addi $t5 $t5 4  # Increment the table pointer 
+		addi $t2 $t2 1  # Increment t6 (count) by 1
+		addi $t1 $t1 1  # Increment index
+		
+		j for4
+		
+	found:
+		lw $v0 0($t5)
+		move $v1 $t1
+		j terminate
+		
+	finish:
+		li $v0 0
+		li $v1 -1
+		j terminate
+		
+	terminate:
+
 	jr $ra
 
 delete:
+	li $t7 0  # Initialize temp to store loop variable (i)
+	li $t8 0  # Initialize temp to store index
+	li $t9 0  # Initialize temp to storer table
+	
+	li $t4 -1  # Tombstone value
+
+	addi $sp $sp -4
+	sw $ra 0($sp)
+
+	jal search
+	
+	move $t8 $v1  # Move the return index from search into temp (t1)
+	move $t9 $a1  # Mmove the table into a temp
+	
+	beq $v1 $t4 notfound
+	
+	while3:
+		beq $t7 $t8 done2  # Loop till the index has reached
+		
+		addi $t9 $t9 4
+		addi $t7 $t7 1  # Increment the loop variable by 1
+		
+		j while3
+	
+	done2:
+		sw $t4 0($t9)
+		move $v0 $t8
+		j exit2
+	
+	notfound:
+		move $v0 $t4
+		j exit2
+	
+	exit2:
+		lw $ra 0($sp)
+		addi $sp $sp 4
+		
 	jr $ra
