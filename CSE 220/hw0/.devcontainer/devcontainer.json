@@ -1,0 +1,12 @@
+{
+    "build": { "dockerfile": "Dockerfile" }, 
+      
+    "customizations": { 
+      "vscode": {
+        "extensions": ["ms-vscode.cpptools-extension-pack", "ms-vscode.cpptools-themes", "lanza.lldb-vscode",
+        "ms-vscode.makefile-tools", "ms-python.python", "ms-python.vscode-pylance", "ms-vscode.cmake-tools",
+        "vadimcn.vscode-lldb"]
+      }
+    }
+  }
+  
